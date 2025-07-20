@@ -14,17 +14,16 @@ func Run() {
 	flagsValues := flags.Init()
 	flagsValues.Register()
 
-	defaultValues := make(map[string]string)
+	defaultValues := map[string]string{
+		"version": flagsValues.Version,
+		"type":    string(flagsValues.Type),
+		"dest":    flagsValues.Path,
+	}
 
-	// TODO: prettier way
-	if !pflag.Lookup("version").Changed {
-		defaultValues["version"] = flagsValues.Version
-	}
-	if !pflag.Lookup("type").Changed {
-		defaultValues["type"] = string(flagsValues.Type)
-	}
-	if !pflag.Lookup("dest").Changed {
-		defaultValues["path"] = flagsValues.Path
+	for key := range defaultValues {
+		if pflag.Lookup(key).Changed {
+			delete(defaultValues, key)
+		}
 	}
 
 	if len(defaultValues) > 0 {
