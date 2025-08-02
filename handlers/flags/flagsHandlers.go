@@ -39,12 +39,14 @@ func Init() *flags {
 	pflag.IntVarP(&flagsVar.Build, "build", "b", 0, "the build version")
 
 	// output
-	pflag.StringVarP(&flagsVar.Path, "dest", "d", "./server.jar", "the destination for the downloaded file")
+	pflag.StringVarP(&flagsVar.Path, "dest", "d", "server.jar", "the destination for the downloaded file")
 
 	pflag.CommandLine.SortFlags = false
+
 	// custom help msg
 	pflag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage %s [args...]\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "  -h, --help\t  show this help message\n")
 		pflag.VisitAll(func(f *pflag.Flag) {
 			fmt.Fprintf(os.Stderr, "  -%s, --%s\t  %s (default: %s)\n", f.Shorthand, f.Name, f.Usage, f.DefValue)
 		})
