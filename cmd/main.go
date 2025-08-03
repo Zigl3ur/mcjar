@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Zigl3ur/mc-jar-fetcher/handlers"
 	"github.com/Zigl3ur/mc-jar-fetcher/handlers/flags"
-	"github.com/Zigl3ur/mc-jar-fetcher/utils"
+	"github.com/Zigl3ur/mc-jar-fetcher/handlers/vanilla"
 	"github.com/spf13/pflag"
 )
 
@@ -14,34 +13,20 @@ func main() {
 	flagsValues := flags.Init()
 	flagsValues.Register()
 
-	defaultFlags := []string{
-		"version",
-		"type",
-		"dest",
-	}
-
-	defaultFlagsValues := []string{}
-
-	for _, flag := range defaultFlags {
-		if !pflag.Lookup(flag).Changed {
-			defaultFlagsValues = append(defaultFlagsValues, fmt.Sprintf("- %s: %s", flag, pflag.Lookup(flag).Value))
+	fmt.Fprintln(os.Stdout, "Using values:")
+	pflag.VisitAll(func(f *pflag.Flag) {
+		if f.Value.String() == "0" {
+			return
 		}
-	}
-
-	if len(defaultFlagsValues) > 0 {
-		fmt.Println("Using default values:")
-		for _, value := range defaultFlagsValues {
-			fmt.Println(value)
-		}
-	}
+		fmt.Fprintf(os.Stdout, "- %s: %s\n", f.Name, f.Value)
+	})
 
 	switch flagsValues.Type {
 	case flags.Vanilla:
-		if url, err := handlers.GetUrlVanilla(flagsValues.Version); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-		} else if err := utils.WriteToFs(url, flagsValues.Path); err != nil {
+		if err := vanilla.VanillaHandler(flagsValues.Version, flagsValues.Path); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}
+
 	default:
 		fmt.Fprintln(os.Stderr, "Invalid type, valid ones are [vanilla, paper, spigot, mohist, forge, fabric]")
 	}

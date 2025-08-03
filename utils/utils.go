@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -45,6 +46,21 @@ func WriteToFs(url, path string) error {
 	_, err = io.Copy(out, io.TeeReader(resp.Body, counter))
 	if err != nil {
 		return errors.New("failed to copy file to fs")
+	}
+
+	return nil
+}
+
+func GetReq(url string, dataJson any) error {
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	if err := json.NewDecoder(resp.Body).Decode(&dataJson); err != nil {
+		return err
 	}
 
 	return nil
