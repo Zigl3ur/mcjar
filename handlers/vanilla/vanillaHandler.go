@@ -6,7 +6,7 @@ import (
 	"github.com/Zigl3ur/mc-jar-fetcher/utils"
 )
 
-func VanillaHandler(version, path string) error {
+func Handler(version, path string) error {
 	url, err := getUrlVanilla(version)
 	if err != nil {
 		return err
@@ -14,17 +14,17 @@ func VanillaHandler(version, path string) error {
 	return utils.WriteToFs(url, path)
 }
 
-func getUrlVanilla(version string) (string, error) {
-	type Versions struct {
-		Versions []struct {
-			Id  string `json:"id"`
-			Url string `json:"url"`
-		}
+type Versions struct {
+	Versions []struct {
+		Id  string `json:"id"`
+		Url string `json:"url"`
 	}
+}
 
-	var versions Versions
-	if err := utils.GetReq("https://launchermeta.mojang.com/mc/game/version_manifest.json", &versions); err != nil {
-		return "", errors.New("failed to fetch version manifest")
+func getUrlVanilla(version string) (string, error) {
+	versions, err := GetVersionsList()
+	if err != nil {
+		return "", err
 	}
 
 	var versionUrl string
@@ -48,10 +48,24 @@ func getUrlVanilla(version string) (string, error) {
 	}
 
 	var downloadData DownloadData
-
 	if err := utils.GetReq(versionUrl, &downloadData); err != nil {
-		return "", errors.New("failed to get download url")
+		return "", errors.New("failed to fetch version details: " + err.Error())
 	}
 
-	return downloadData.Downloads.Server.Url, nil
+	serverUrl := downloadData.Downloads.Server.Url
+	if serverUrl == "" {
+		return "", errors.New("no server jar available for version: " + version)
+	}
+
+	return serverUrl, nil
+}
+
+func GetVersionsList() (Versions, error) {
+
+	var versions Versions
+	if err := utils.GetReq("https://launchermeta.mojang.com/mc/game/version_manifest.json", &versions); err != nil {
+		return versions, errors.New("failed to fetch version manifest")
+	}
+
+	return versions, nil
 }

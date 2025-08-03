@@ -3,43 +3,41 @@ package flags
 import (
 	"fmt"
 	"os"
+	"slices"
+	"strings"
 
+	vanillaHandler "github.com/Zigl3ur/mc-jar-fetcher/handlers/vanilla"
 	"github.com/spf13/pflag"
 )
 
-type ServerType string
-
-const (
-	Vanilla ServerType = "vanilla"
-	Forge   ServerType = "forge"
-	Mohist  ServerType = "mohist"
-	Paper   ServerType = "paper"
-	Fabric  ServerType = "fabric"
-	Spigot  ServerType = "spigot"
-)
+const invalidServerType string = "Invalid server type, valid ones are [vanilla, paper, spigot, mohist, forge, fabric]"
 
 type flags struct {
-	Version string     // minecraft version
-	Type    ServerType // like forge, mohist, paper, etc
-	Build   int        // build version like for fabric and forge
-	Path    string     // the name of the file outputted from the download
+	list       string // list version for specified server type
+	version    string // minecraft version
+	serverType string // like forge, mohist, paper, etc
+	build      int    // build version like for fabric and forge
+	path       string // the name of the file outputted from the download
 }
 
 func Init() *flags {
 	flagsVar := &flags{}
 
+	// list
+	pflag.StringVarP(&flagsVar.list, "list", "l", "", "list available versions for the specified versions")
+
 	// version
-	pflag.StringVarP(&flagsVar.Version, "version", "v", "1.21.1", "the server version")
+	pflag.StringVarP(&flagsVar.version, "version", "v", "1.21", "the server version")
 
 	// type
-	pflag.StringVarP((*string)(&flagsVar.Type), "type", "t", string(Vanilla), "the server type")
+	pflag.StringVarP((*string)(&flagsVar.serverType), "type", "t", "vanilla", "the server type")
 
 	// build
 	// TODO: not sure all build are gonna be int
-	pflag.IntVarP(&flagsVar.Build, "build", "b", 0, "the build version")
+	pflag.IntVarP(&flagsVar.build, "build", "b", 0, "the build version")
 
 	// output
-	pflag.StringVarP(&flagsVar.Path, "dest", "d", "server.jar", "the destination for the downloaded file")
+	pflag.StringVarP(&flagsVar.path, "dest", "d", "server.jar", "the destination for the downloaded file")
 
 	pflag.CommandLine.SortFlags = false
 
@@ -56,6 +54,46 @@ func Init() *flags {
 	return flagsVar
 }
 
-func (f *flags) Register() {
+func (f *flags) Validate() {
 	pflag.Parse()
+
+	validServerType := []string{"vanilla", "forge", "mohist", "paper", "fabric", "spigot"}
+
+	if !slices.Contains(validServerType, f.serverType) {
+		fmt.Fprintln(os.Stderr, invalidServerType)
+		os.Exit(1)
+	}
+
+}
+
+func (f *flags) Execute() {
+	if f.list != "" {
+		switch strings.ToLower(f.list) {
+		case "vanilla":
+			vlist, err := vanillaHandler.GetVersionsList()
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				os.Exit(1)
+			}
+
+			for _, v := range vlist.Versions {
+				fmt.Fprintf(os.Stdout, "- %s\n", v.Id)
+			}
+			os.Exit(0)
+		default:
+			fmt.Fprintln(os.Stderr, invalidServerType)
+			os.Exit(1)
+		}
+	}
+
+	switch f.serverType {
+	case "vanilla":
+		if err := vanillaHandler.Handler(f.version, f.path); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+	default:
+		fmt.Fprintln(os.Stderr, invalidServerType)
+		os.Exit(0)
+	}
 }

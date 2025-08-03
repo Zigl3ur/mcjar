@@ -43,8 +43,7 @@ func WriteToFs(url, path string) error {
 	defer out.Close()
 
 	counter := &WriteCounter{ContentLength: resp.ContentLength, Dest: path}
-	_, err = io.Copy(out, io.TeeReader(resp.Body, counter))
-	if err != nil {
+	if _, err = io.Copy(out, io.TeeReader(resp.Body, counter)); err != nil {
 		return errors.New("failed to copy file to fs")
 	}
 
