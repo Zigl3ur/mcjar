@@ -2,6 +2,7 @@ package vanilla
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/Zigl3ur/mc-jar-fetcher/utils"
 )
@@ -36,7 +37,7 @@ func getUrl(version string) (string, error) {
 	}
 
 	if versionUrl == "" {
-		return "", errors.New("specified version not found")
+		return "", fmt.Errorf("specified version not found (given: %s)", version)
 	}
 
 	type DownloadData struct {
@@ -49,12 +50,12 @@ func getUrl(version string) (string, error) {
 
 	var downloadData DownloadData
 	if err := utils.GetReq(versionUrl, &downloadData); err != nil {
-		return "", errors.New("failed to fetch version details: " + err.Error())
+		return "", errors.New("failed to fetch version details")
 	}
 
 	serverUrl := downloadData.Downloads.Server.Url
 	if serverUrl == "" {
-		return "", errors.New("no server jar available for version: " + version)
+		return "", fmt.Errorf("no vanilla jar available for specified version (given: %s)", version)
 	}
 
 	return serverUrl, nil

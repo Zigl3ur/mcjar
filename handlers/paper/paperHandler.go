@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/Zigl3ur/mc-jar-fetcher/utils"
+	"github.com/spf13/pflag"
 )
 
 func Handler(version, build, path string) error {
@@ -35,19 +36,29 @@ func getUrlPaper(version, build string) (string, error) {
 	}
 
 	fetchUrl := fmt.Sprintf("https://fill.papermc.io/v3/projects/paper/versions/%s/builds/latest", version)
-	if build != "" {
+	errorMsg := fmt.Errorf("no paper jar available for provided version (given: %s)", version)
+
+	if pflag.Lookup("build").Changed {
 		fetchUrl = fmt.Sprintf("https://fill.papermc.io/v3/projects/paper/versions/%s/builds/%s", version, build)
+		errorMsg = fmt.Errorf("no paper jar available for provided version / build (given: %s, %s)", version, build)
 	}
 
 	var paperUrl PaperUrl
 	if err := utils.GetReq(fetchUrl, &paperUrl); err != nil {
-		return "", errors.New("paper doesnt support this version")
+		return "", errors.New("failed to fetch version details")
 	}
 
-	return paperUrl.Downloads.ServerDefault.Url, nil
+	serverUrl := paperUrl.Downloads.ServerDefault.Url
+	if serverUrl == "" {
+		return "", errorMsg
+	}
+
+	return serverUrl, nil
 }
 
 func GetVersionsList() ([]string, error) {
+
+	// TODO order version list
 
 	var versions PaperVersions
 	if err := utils.GetReq("https://fill.papermc.io/v3/projects", &versions); err != nil {
