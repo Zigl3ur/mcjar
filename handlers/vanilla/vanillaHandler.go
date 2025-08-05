@@ -7,7 +7,7 @@ import (
 )
 
 func Handler(version, path string) error {
-	url, err := getUrlVanilla(version)
+	url, err := getUrl(version)
 	if err != nil {
 		return err
 	}
@@ -21,7 +21,7 @@ type Versions struct {
 	}
 }
 
-func getUrlVanilla(version string) (string, error) {
+func getUrl(version string) (string, error) {
 	versions, err := GetVersionsList()
 	if err != nil {
 		return "", err
