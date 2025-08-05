@@ -113,7 +113,7 @@ func (f *flags) Execute() {
 			os.Exit(1)
 		}
 	case "paper":
-		if err := paper.Handler(f.version, f.path); err != nil {
+		if err := paper.Handler(f.version, f.build, f.path); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}

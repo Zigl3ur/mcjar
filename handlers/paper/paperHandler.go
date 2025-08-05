@@ -7,8 +7,8 @@ import (
 	"github.com/Zigl3ur/mc-jar-fetcher/utils"
 )
 
-func Handler(version, path string) error {
-	url, err := getUrlPaper(version)
+func Handler(version, build, path string) error {
+	url, err := getUrlPaper(version, build)
 	if err != nil {
 		return err
 	}
@@ -25,7 +25,7 @@ type PaperVersions struct {
 	} `json:"projects"`
 }
 
-func getUrlPaper(version string) (string, error) {
+func getUrlPaper(version, build string) (string, error) {
 	type PaperUrl struct {
 		Downloads struct {
 			ServerDefault struct {
@@ -34,8 +34,13 @@ func getUrlPaper(version string) (string, error) {
 		} `json:"downloads"`
 	}
 
+	fetchUrl := fmt.Sprintf("https://fill.papermc.io/v3/projects/paper/versions/%s/builds/latest", version)
+	if build != "" {
+		fetchUrl = fmt.Sprintf("https://fill.papermc.io/v3/projects/paper/versions/%s/builds/%s", version, build)
+	}
+
 	var paperUrl PaperUrl
-	if err := utils.GetReq(fmt.Sprintf("https://fill.papermc.io/v3/projects/paper/versions/%s/builds/latest", version), &paperUrl); err != nil {
+	if err := utils.GetReq(fetchUrl, &paperUrl); err != nil {
 		return "", errors.New("paper doesnt support this version")
 	}
 
@@ -61,4 +66,25 @@ func GetVersionsList() ([]string, error) {
 	}
 
 	return versionList, nil
+}
+
+func GetBuildList(version string) ([]int, error) {
+	type PaperBuild struct {
+		Id int `json:"id"`
+	}
+
+	var builds []PaperBuild
+	if err := utils.GetReq(fmt.Sprintf("https://fill.papermc.io/v3/projects/paper/versions/%s/builds?channel=STABLE", version), &builds); err != nil {
+		return nil, errors.New("failed to fetch paper build list")
+	}
+
+	fmt.Println(builds)
+
+	buildsList := []int{}
+
+	for _, b := range builds {
+		buildsList = append(buildsList, b.Id)
+	}
+
+	return buildsList, nil
 }
