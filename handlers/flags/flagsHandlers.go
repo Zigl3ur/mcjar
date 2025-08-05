@@ -2,6 +2,7 @@ package flags
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"slices"
 	"strings"
@@ -48,7 +49,6 @@ func Init() *flags {
 		pflag.VisitAll(func(f *pflag.Flag) {
 			fmt.Fprintf(os.Stderr, "  -%s, --%s\t  %s\n", f.Shorthand, f.Name, f.Usage)
 		})
-		os.Exit(0)
 	}
 
 	return flagsVar
@@ -60,42 +60,34 @@ func (f *flags) Validate() {
 	validServerType := []string{"vanilla", "forge", "mohist", "paper", "fabric", "spigot"}
 
 	if !slices.Contains(validServerType, f.serverType) {
-		fmt.Fprintln(os.Stderr, invalidServerType)
-		os.Exit(1)
+		log.Fatal(invalidServerType)
 	}
 
 }
 
 func (f *flags) Execute() {
-	if f.list != "" {
+	if pflag.Lookup("list").Changed {
 		switch strings.ToLower(f.list) {
 		case "vanilla":
 			vlist, err := vanilla.GetVersionsList()
 			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				os.Exit(1)
+				log.Fatal(err)
 			}
 
 			for _, v := range vlist.Versions {
-				fmt.Fprintf(os.Stdout, "- %s\n", v.Id)
+				fmt.Printf("- %s\n", v.Id)
 			}
-			os.Exit(0)
 		case "paper":
 			vlist, err := paper.GetVersionsList()
 			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				os.Exit(1)
+				log.Fatal(err)
 			}
 
-			for _, v := range vlist {
-				fmt.Fprintf(os.Stdout, "- %s\n", v)
-			}
-
-			os.Exit(0)
+			fmt.Println(vlist)
 		default:
-			fmt.Fprintln(os.Stderr, invalidServerType)
-			os.Exit(1)
+			log.Fatal(invalidServerType)
 		}
+		os.Exit(0)
 	}
 
 	fmt.Fprintln(os.Stdout, "Using Values:")
@@ -109,16 +101,13 @@ func (f *flags) Execute() {
 	switch f.serverType {
 	case "vanilla":
 		if err := vanilla.Handler(f.version, f.path); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
+			log.Fatal(err)
 		}
 	case "paper":
 		if err := paper.Handler(f.version, f.build, f.path); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
+			log.Fatal(err)
 		}
 	default:
-		fmt.Fprintln(os.Stderr, invalidServerType)
-		os.Exit(0)
+		log.Fatal(invalidServerType)
 	}
 }

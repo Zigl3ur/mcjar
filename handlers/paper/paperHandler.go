@@ -16,16 +16,6 @@ func Handler(version, build, path string) error {
 	return utils.WriteToFs(url, path)
 }
 
-type PaperVersions struct {
-	Projects []struct {
-		Project struct {
-			Id   string `json:"id"`
-			Name string `json:"name"`
-		} `json:"project"`
-		Versions map[string][]string `json:"versions"`
-	} `json:"projects"`
-}
-
 func getUrlPaper(version, build string) (string, error) {
 	type PaperUrl struct {
 		Downloads struct {
@@ -56,27 +46,27 @@ func getUrlPaper(version, build string) (string, error) {
 	return serverUrl, nil
 }
 
-func GetVersionsList() ([]string, error) {
+type PaperVersions struct {
+	Versions []struct {
+		Version struct {
+			Id      string `json:"id"`
+			Support struct {
+				Status string `json:"status"`
+			} `json:"support"`
+		} `json:"version"`
+		Builds []int `json:"builds"`
+	} `json:"versions"`
+}
 
-	// TODO order version list
+func GetVersionsList() (PaperVersions, error) {
 
 	var versions PaperVersions
-	if err := utils.GetReq("https://fill.papermc.io/v3/projects", &versions); err != nil {
+	if err := utils.GetReq("https://fill.papermc.io/v3/projects/paper/versions", &versions); err != nil {
 		fmt.Println(err)
-		return nil, errors.New("failed to fetch paper versions")
+		return versions, errors.New("failed to fetch paper versions")
 	}
 
-	var versionList []string
-
-	for _, p := range versions.Projects {
-		if p.Project.Id == "paper" {
-			for k, v := range p.Versions {
-				fmt.Printf("%s - %s\n", k, v)
-			}
-		}
-	}
-
-	return versionList, nil
+	return versions, nil
 }
 
 func GetBuildList(version string) ([]int, error) {
