@@ -62,30 +62,22 @@ func GetVersionsList() (PaperVersions, error) {
 
 	var versions PaperVersions
 	if err := utils.GetReq("https://fill.papermc.io/v3/projects/paper/versions", &versions); err != nil {
-		fmt.Println(err)
 		return versions, errors.New("failed to fetch paper versions")
 	}
 
 	return versions, nil
 }
 
-func GetBuildList(version string) ([]int, error) {
-	type PaperBuild struct {
-		Id int `json:"id"`
-	}
+type PaperBuild struct {
+	Id int `json:"id"`
+}
+
+func GetBuildList(version string) ([]PaperBuild, error) {
 
 	var builds []PaperBuild
 	if err := utils.GetReq(fmt.Sprintf("https://fill.papermc.io/v3/projects/paper/versions/%s/builds?channel=STABLE", version), &builds); err != nil {
 		return nil, errors.New("failed to fetch paper build list")
 	}
 
-	fmt.Println(builds)
-
-	buildsList := []int{}
-
-	for _, b := range builds {
-		buildsList = append(buildsList, b.Id)
-	}
-
-	return buildsList, nil
+	return builds, nil
 }

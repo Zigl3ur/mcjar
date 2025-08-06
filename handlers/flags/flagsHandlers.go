@@ -25,19 +25,19 @@ type flags struct {
 func Init() *flags {
 	flagsVar := &flags{}
 
-	// list
+	// list available versions / builds for a server type
 	pflag.StringVarP(&flagsVar.list, "list", "l", "", "list available versions for the specified server type")
 
-	// version
+	// game version
 	pflag.StringVarP(&flagsVar.version, "version", "v", "1.21", "the server version")
 
-	// type
+	// server type
 	pflag.StringVarP((*string)(&flagsVar.serverType), "type", "t", "vanilla", "the server type")
 
 	// build
 	pflag.StringVarP(&flagsVar.build, "build", "b", "", "the build version")
 
-	// output
+	// file destination
 	pflag.StringVarP(&flagsVar.path, "dest", "d", "server.jar", "the destination for the downloaded file")
 
 	pflag.CommandLine.SortFlags = false
@@ -54,17 +54,23 @@ func Init() *flags {
 	return flagsVar
 }
 
+// validate data for provided flags without making any api calls
 func (f *flags) Validate() {
 	pflag.Parse()
 
-	validServerType := []string{"vanilla", "forge", "mohist", "paper", "fabric", "spigot"}
+	validServerType := []string{"vanilla", "forge", "mohist", "paper", "fabric", "spigot", "purpur"}
 
-	if !slices.Contains(validServerType, f.serverType) {
+	if pflag.Lookup("type").Changed && !slices.Contains(validServerType, f.serverType) {
+		log.Fatal(invalidServerType)
+	}
+
+	if pflag.Lookup("list").Changed && !slices.Contains(validServerType, f.list) {
 		log.Fatal(invalidServerType)
 	}
 
 }
 
+// execute functions relative to flags data
 func (f *flags) Execute() {
 	if pflag.Lookup("list").Changed {
 		switch strings.ToLower(f.list) {
@@ -83,20 +89,45 @@ func (f *flags) Execute() {
 				log.Fatal(err)
 			}
 
-			fmt.Println(vlist)
+			if !pflag.Lookup("version").Changed {
+				for _, v := range vlist.Versions {
+					fmt.Printf("- %s:\n", v.Version.Id)
+					fmt.Println("  - builds:")
+					for _, b := range v.Builds {
+						fmt.Printf("\t- %d\n", b)
+					}
+				}
+			} else {
+				found := false
+				for _, v := range vlist.Versions {
+					if v.Version.Id == f.version {
+						fmt.Printf("- %s:\n", f.version)
+						fmt.Println("  - builds:")
+						for _, b := range v.Builds {
+							fmt.Printf("\t- %d\n", b)
+						}
+						found = true
+						break
+					}
+				}
+				if !found {
+					log.Fatal("paper doesn't support this version")
+				}
+			}
+
 		default:
 			log.Fatal(invalidServerType)
 		}
 		os.Exit(0)
 	}
 
-	fmt.Fprintln(os.Stdout, "Using Values:")
-	fmt.Fprintf(os.Stdout, "- type: %s\n", f.serverType)
-	fmt.Fprintf(os.Stdout, "- version: %s\n", f.version)
-	if f.build != "" {
-		fmt.Fprintf(os.Stdout, "- build: %s\n", f.build)
+	fmt.Println("Using Values:")
+	fmt.Printf("- type: %s\n", f.serverType)
+	fmt.Printf("- version: %s\n", f.version)
+	if pflag.Lookup("build").Changed {
+		fmt.Printf("- build: %s\n", f.build)
 	}
-	fmt.Fprintf(os.Stdout, "- dest: %s\n", f.path)
+	fmt.Printf("- dest: %s\n", f.path)
 
 	switch f.serverType {
 	case "vanilla":
