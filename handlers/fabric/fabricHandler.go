@@ -1,11 +1,14 @@
-package paper
+package fabric
 
 import (
 	"errors"
 	"fmt"
 
 	"github.com/Zigl3ur/mc-jar-fetcher/utils"
+	"github.com/spf13/pflag"
 )
+
+const baseUrl string = "https://meta.fabricmc.net/v2/versions"
 
 func Handler(version, build, path string) error {
 	url, err := getUrl(version, build)
@@ -27,7 +30,7 @@ func getUrl(version, build string) (string, error) {
 	fetchUrl := fmt.Sprintf("https://fill.papermc.io/v3/projects/paper/versions/%s/builds/latest", version)
 	errorMsg := fmt.Errorf("no paper jar available for provided version (given: %s)", version)
 
-	if build != "" {
+	if pflag.Lookup("build").Changed {
 		fetchUrl = fmt.Sprintf("https://fill.papermc.io/v3/projects/paper/versions/%s/builds/%s", version, build)
 		errorMsg = fmt.Errorf("no paper jar available for provided version / build (given: %s, %s)", version, build)
 	}
@@ -45,23 +48,18 @@ func getUrl(version, build string) (string, error) {
 	return serverUrl, nil
 }
 
-type PaperVersions struct {
+type FabricVersion struct {
 	Versions []struct {
-		Version struct {
-			Id      string `json:"id"`
-			Support struct {
-				Status string `json:"status"`
-			} `json:"support"`
-		} `json:"version"`
-		Builds []int `json:"builds"`
-	} `json:"versions"`
+		Version string `json:"version"`
+		Stable  bool   `json:"stable"`
+	} `json:"game"`
 }
 
-func GetVersionsList() (PaperVersions, error) {
+func GetVersionsList() (FabricVersion, error) {
 
-	var versions PaperVersions
-	if err := utils.GetReq("https://fill.papermc.io/v3/projects/paper/versions", &versions); err != nil {
-		return versions, errors.New("failed to fetch paper versions")
+	var versions FabricVersion
+	if err := utils.GetReq(baseUrl, &versions); err != nil {
+		return versions, errors.New("failed to fetch fabric versions")
 	}
 
 	return versions, nil
