@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/Zigl3ur/mc-jar-fetcher/utils"
+	"github.com/Zigl3ur/mcli/internal/utils"
 )
 
 func Handler(version, build, path string) error {

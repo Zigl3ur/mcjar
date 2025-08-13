@@ -26,7 +26,6 @@ func (wc *WriteCounter) Write(p []byte) (int, error) {
 }
 
 func WriteToFs(url, path string) error {
-
 	resp, err := http.Get(url)
 
 	if err != nil {

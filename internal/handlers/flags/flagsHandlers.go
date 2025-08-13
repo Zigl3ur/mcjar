@@ -6,13 +6,13 @@ import (
 	"os"
 	"slices"
 
-	"github.com/Zigl3ur/mc-jar-fetcher/handlers/paper"
-	"github.com/Zigl3ur/mc-jar-fetcher/handlers/purpur"
-	"github.com/Zigl3ur/mc-jar-fetcher/handlers/vanilla"
+	"github.com/Zigl3ur/mcli/handlers/fabric"
+	"github.com/Zigl3ur/mcli/handlers/paper"
+	"github.com/Zigl3ur/mcli/handlers/purpur"
+	"github.com/Zigl3ur/mcli/handlers/vanilla"
 	"github.com/spf13/pflag"
 )
 
-const invalidServerType string = "Invalid server type, valid ones are [vanilla, paper, spigot, purpur, forge, fabric]"
 
 type flags struct {
 	list       string // list version for specified server type
@@ -141,32 +141,29 @@ func (f *flags) Execute() {
 					log.Fatal("purpur doesn't support this version")
 				}
 			}
-		// case "fabric":
-		// 	vlist, err := fabric.GetVersionsList()
-		// 	if err != nil {
-		// 		log.Fatal(err)
-		// 	}
+		case "fabric":
+			vlist, err := fabric.GetVersionsList()
+			if err != nil {
+				log.Fatal(err)
+			}
 
-		// 	if !pflag.Lookup("version").Changed {
-		// 		for _, v := range vlist.Versions {
-		// 			fmt.Printf("- %s:\n", v.Version)
-		// 		}
-		// 	} else {
-		// 		found := false
-		// 		for {
-		// 			builds, _ := purpur.GetBuildList(f.version)
-		// 			slices.Reverse(builds)
-		// 			fmt.Printf("- %s:\n", f.version)
-		// 			fmt.Println("  - builds:")
-		// 			for _, b := range builds {
-		// 				fmt.Printf("\t- %s\n", b)
-		// 			}
-		// 			found = true
-		// 		}
-		// 		if !found {
-		// 			log.Fatal("purpur doesn't support this version")
-		// 		}
-		// }
+			if !pflag.Lookup("version").Changed {
+				for _, v := range vlist.Versions {
+					fmt.Printf("- %s:\n", v.Version)
+				}
+			} else {
+				found := false
+				for _, v := range vlist.Versions {
+					if v.Version == f.version {
+						fmt.Printf("- %s\n", v.Version)
+						found = true
+						break
+					}
+				}
+				if !found {
+					log.Fatal("fabric doesn't support this version")
+				}
+			}
 
 		default:
 			log.Fatal(invalidServerType)
