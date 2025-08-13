@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/Zigl3ur/mc-jar-fetcher/utils"
+	"github.com/Zigl3ur/mcli/internal/utils"
 )
 
 func Handler(version, path string) error {
