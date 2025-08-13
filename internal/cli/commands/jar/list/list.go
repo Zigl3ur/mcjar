@@ -3,10 +3,10 @@ package list
 import (
 	"fmt"
 	"log"
-	"os"
 	"slices"
 
 	"github.com/Zigl3ur/mcli/internal/cli/flags"
+	"github.com/Zigl3ur/mcli/internal/handlers/fabric"
 	"github.com/Zigl3ur/mcli/internal/handlers/paper"
 	"github.com/Zigl3ur/mcli/internal/handlers/purpur"
 	"github.com/Zigl3ur/mcli/internal/handlers/vanilla"
@@ -22,7 +22,7 @@ func NewCommand() *cobra.Command {
 		Run:   execute,
 	}
 
-	cmd.Flags().StringP("type", "t", flags.Vanilla.String(), "The server type to get version / builds list")
+	cmd.Flags().StringP("type", "t", "", "The server type to get version / builds list")
 	cmd.Flags().StringP("version", "v", "1.21", "The server version to get the list of builds")
 
 	return cmd
@@ -104,32 +104,17 @@ func execute(cmd *cobra.Command, args []string) {
 				log.Fatal("purpur doesn't support this version")
 			}
 		}
-	// case "fabric":
-	// vlist, err := fabric.GetVersionsList()
-	// if err != nil {
-	// log.Fatal(err)
-	// }
-	//
-	// if !pflag.Lookup("version").Changed {
-	// for _, v := range vlist.Versions {
-	// fmt.Printf("- %s:\n", v.Version)
-	// }
-	// } else {
-	// found := false
-	// for _, v := range vlist.Versions {
-	// if v.Version == f.version {
-	// fmt.Printf("- %s\n", v.Version)
-	// found = true
-	// break
-	// }
-	// }
-	// if !found {
-	// log.Fatal("fabric doesn't support this version")
-	// }
-	// }
+	case "fabric":
+		vlist, err := fabric.GetVersionsList()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for _, v := range vlist.Versions {
+			fmt.Printf("- %s:\n", v.Version)
+		}
 
 	default:
 		log.Fatal(invalidServerType)
 	}
-	os.Exit(0)
 }

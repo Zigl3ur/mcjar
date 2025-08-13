@@ -4,46 +4,30 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/Zigl3ur/mcli/utils"
-	"github.com/spf13/pflag"
+	"github.com/Zigl3ur/mcli/internal/utils"
 )
 
-func Handler(version, build, path string) error {
-	url, err := getUrl(version, build)
+func Handler(version, path string) error {
+	url, err := getUrl(version)
 	if err != nil {
 		return err
 	}
+
 	return utils.WriteToFs(url, path)
 }
 
-func getUrl(version, build string) (string, error) {
-	type PaperUrl struct {
-		Downloads struct {
-			ServerDefault struct {
-				Url string `json:"url"`
-			} `json:"server:default"`
-		} `json:"downloads"`
+func getUrl(version string) (string, error) {
+	loader, err := GetStableLoader()
+	if err != nil {
+		return "", err
 	}
 
-	fetchUrl := fmt.Sprintf("https://fill.papermc.io/v3/projects/paper/versions/%s/builds/latest", version)
-	errorMsg := fmt.Errorf("no paper jar available for provided version (given: %s)", version)
-
-	if pflag.Lookup("build").Changed {
-		fetchUrl = fmt.Sprintf("https://fill.papermc.io/v3/projects/paper/versions/%s/builds/%s", version, build)
-		errorMsg = fmt.Errorf("no paper jar available for provided version / build (given: %s, %s)", version, build)
+	installer, err := GetStableInstaller()
+	if err != nil {
+		return "", err
 	}
 
-	var paperUrl PaperUrl
-	if err := utils.GetReq(fetchUrl, &paperUrl); err != nil {
-		return "", errors.New("failed to fetch version details")
-	}
-
-	serverUrl := paperUrl.Downloads.ServerDefault.Url
-	if serverUrl == "" {
-		return "", errorMsg
-	}
-
-	return serverUrl, nil
+	return fmt.Sprintf("https://meta.fabricmc.net/v2/versions/loader/%s/%s/%s/server/jar", version, loader, installer), nil
 }
 
 type FabricVersion struct {
@@ -63,7 +47,7 @@ func GetVersionsList() (FabricVersion, error) {
 	return versions, nil
 }
 
-func GetLoader() (string, error) {
+func GetStableLoader() (string, error) {
 
 	type LoaderList []struct {
 		Version string `json:"version"`
@@ -72,8 +56,35 @@ func GetLoader() (string, error) {
 
 	var list LoaderList
 	if err := utils.GetReq("https://meta.fabricmc.net/v2/versions/loader", &list); err != nil {
-		return list, errors.New("failed to fetch fabric loaders")
+		return "", errors.New("failed to fetch fabric loaders")
 	}
 
-	return versions, nil
+	for _, l := range list {
+		if l.Stable {
+			return l.Version, nil
+		}
+	}
+
+	return "", errors.New("no stable fabric loader found")
+}
+
+func GetStableInstaller() (string, error) {
+
+	type InstallerList []struct {
+		Version string `json:"version"`
+		Stable  bool   `json:"stable"`
+	}
+
+	var list InstallerList
+	if err := utils.GetReq("https://meta.fabricmc.net/v2/versions/installer", &list); err != nil {
+		return "", errors.New("failed to fetch fabric installer")
+	}
+
+	for _, l := range list {
+		if l.Stable {
+			return l.Version, nil
+		}
+	}
+
+	return "", errors.New("no stable fabric installer found")
 }

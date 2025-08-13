@@ -12,7 +12,6 @@ import (
 type WriteCounter struct {
 	Total         uint64
 	ContentLength int64
-	Dest          string
 }
 
 var loadingGlyphs = []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
@@ -21,14 +20,13 @@ func (wc *WriteCounter) Write(p []byte) (int, error) {
 	n := len(p)
 	wc.Total += uint64(n)
 
-	progress := int64(wc.Total*100) / wc.ContentLength
 	spinnerIndex := (wc.Total / 1024000) % uint64(len(loadingGlyphs))
 
-	fmt.Printf("\r%s Downloading: %02d%%", Loading(spinnerIndex), progress)
-
-	if wc.Total == uint64(wc.ContentLength) {
-		ClearLine()
-		fmt.Printf("✓ Saved to %s\n", wc.Dest)
+	if wc.ContentLength > 0 {
+		progress := int64(wc.Total*100) / wc.ContentLength
+		fmt.Printf("\r%s Downloading: %02d%%", Loading(spinnerIndex), progress)
+	} else {
+		fmt.Printf("\r%s Downloading: %d bytes", Loading(spinnerIndex), wc.Total)
 	}
 
 	return n, nil
@@ -50,10 +48,13 @@ func WriteToFs(url, path string) error {
 
 	defer out.Close()
 
-	counter := &WriteCounter{ContentLength: resp.ContentLength, Dest: path}
+	counter := &WriteCounter{ContentLength: resp.ContentLength}
 	if _, err = io.Copy(out, io.TeeReader(resp.Body, counter)); err != nil {
 		return errors.New("failed to copy file to fs")
 	}
+
+	ClearLine()
+	fmt.Printf("Saved to %s\n", path)
 
 	return nil
 }
