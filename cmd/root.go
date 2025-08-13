@@ -4,20 +4,21 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
 	"os"
 
+	"github.com/Zigl3ur/mcli/internal/cli/commands/jar"
 	"github.com/spf13/cobra"
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "mcli",
-	Short: "Simple cli tool to easily manage minecraft server files",
-	Long:  "A simple cli tool to make minecraft server file management easier.",
+	Short: "Simple cli tool to easily manage minecraft server",
+	Long:  "A simple cli tool to make minecraft server management simple by providing jar download, world saving, and rcon",
+	Run:   execute,
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
@@ -26,13 +27,16 @@ func Execute() {
 }
 
 func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
+	rootCmd.Flags().BoolP("version", "v", false, "display mcli version")
+	rootCmd.AddCommand(jar.NewCommand())
+}
 
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.mc-jar-fetcher.yaml)")
+func execute(cmd *cobra.Command, args []string) {
+	versionToggle, _ := cmd.Flags().GetBool("version")
 
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	if versionToggle {
+		fmt.Println("mcli version 0.0.1")
+	} else {
+		cmd.Usage()
+	}
 }

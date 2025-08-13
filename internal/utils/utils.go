@@ -15,13 +15,22 @@ type WriteCounter struct {
 	Dest          string
 }
 
+var loadingGlyphs = []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
+
 func (wc *WriteCounter) Write(p []byte) (int, error) {
 	n := len(p)
 	wc.Total += uint64(n)
-	fmt.Fprintf(os.Stdout, "\rDownloading: %02d%%", int64(wc.Total*100)/wc.ContentLength)
+
+	progress := int64(wc.Total*100) / wc.ContentLength
+	spinnerIndex := (wc.Total / 1024000) % uint64(len(loadingGlyphs))
+
+	fmt.Printf("\r%s Downloading: %02d%%", Loading(spinnerIndex), progress)
+
 	if wc.Total == uint64(wc.ContentLength) {
-		fmt.Fprintf(os.Stdout, "\nSaved to %s\n", wc.Dest)
+		ClearLine()
+		fmt.Printf("✓ Saved to %s\n", wc.Dest)
 	}
+
 	return n, nil
 }
 
@@ -62,4 +71,12 @@ func GetReq(url string, dataJson any) error {
 	}
 
 	return nil
+}
+
+func Loading(index uint64) string {
+	return loadingGlyphs[index%uint64(len(loadingGlyphs))]
+}
+
+func ClearLine() {
+	fmt.Print("\r\033[K")
 }
