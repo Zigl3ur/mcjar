@@ -7,26 +7,26 @@ import (
 	"io"
 	"net/http"
 	"os"
+
+	"github.com/Zigl3ur/mcli/internal/utils/loader"
 )
+
+const InvalidServerType string = "Invalid server type, valid ones are [vanilla, paper, spigot, purpur, forge, neoforge, fabric]"
 
 type WriteCounter struct {
 	Total         uint64
 	ContentLength int64
 }
 
-var loadingGlyphs = []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
-
 func (wc *WriteCounter) Write(p []byte) (int, error) {
 	n := len(p)
 	wc.Total += uint64(n)
 
-	spinnerIndex := (wc.Total / 1024000) % uint64(len(loadingGlyphs))
-
 	if wc.ContentLength > 0 {
 		progress := int64(wc.Total*100) / wc.ContentLength
-		fmt.Printf("\r%s Downloading: %02d%%", Loading(spinnerIndex), progress)
+		loader.UpdateMessage(fmt.Sprintf("Downloading: %02d%%", progress))
 	} else {
-		fmt.Printf("\r%s Downloading: %d bytes", Loading(spinnerIndex), wc.Total)
+		loader.UpdateMessage(fmt.Sprintf("Downloading: %d bytes", wc.Total))
 	}
 
 	return n, nil
@@ -48,12 +48,14 @@ func WriteToFs(url, path string) error {
 
 	defer out.Close()
 
+	loader.Start("Download starting")
+
 	counter := &WriteCounter{ContentLength: resp.ContentLength}
 	if _, err = io.Copy(out, io.TeeReader(resp.Body, counter)); err != nil {
 		return errors.New("failed to copy file to fs")
 	}
 
-	ClearLine()
+	loader.Stop()
 	fmt.Printf("Saved to %s\n", path)
 
 	return nil
@@ -72,12 +74,4 @@ func GetReq(url string, dataJson any) error {
 	}
 
 	return nil
-}
-
-func Loading(index uint64) string {
-	return loadingGlyphs[index%uint64(len(loadingGlyphs))]
-}
-
-func ClearLine() {
-	fmt.Print("\r\033[K")
 }

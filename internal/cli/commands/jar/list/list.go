@@ -7,13 +7,14 @@ import (
 
 	"github.com/Zigl3ur/mcli/internal/cli/flags"
 	"github.com/Zigl3ur/mcli/internal/handlers/fabric"
+	"github.com/Zigl3ur/mcli/internal/handlers/neoforge"
 	"github.com/Zigl3ur/mcli/internal/handlers/paper"
 	"github.com/Zigl3ur/mcli/internal/handlers/purpur"
 	"github.com/Zigl3ur/mcli/internal/handlers/vanilla"
+	"github.com/Zigl3ur/mcli/internal/utils"
+	"github.com/Zigl3ur/mcli/internal/utils/loader"
 	"github.com/spf13/cobra"
 )
-
-const invalidServerType string = "Invalid server type, valid ones are [vanilla, paper, spigot, purpur, forge, fabric]"
 
 func NewCommand() *cobra.Command {
 	cmd := &cobra.Command{
@@ -32,12 +33,15 @@ func execute(cmd *cobra.Command, args []string) {
 	serverType := cmd.Flag("type").Value.String()
 	version := cmd.Flag("version").Value.String()
 
+	loader.Start(fmt.Sprintf("fetching %s versions", serverType))
+
 	switch serverType {
 	case flags.Vanilla.String():
 		vlist, err := vanilla.GetVersionsList()
 		if err != nil {
 			log.Fatal(err)
 		}
+		loader.Stop()
 
 		for _, v := range vlist.Versions {
 			fmt.Printf("- %s\n", v.Id)
@@ -47,6 +51,7 @@ func execute(cmd *cobra.Command, args []string) {
 		if err != nil {
 			log.Fatal(err)
 		}
+		loader.Stop()
 
 		if !cmd.Flag("version").Changed {
 			for _, v := range vlist.Versions {
@@ -80,6 +85,7 @@ func execute(cmd *cobra.Command, args []string) {
 			log.Fatal(err)
 		}
 		slices.Reverse(vlist)
+		loader.Stop()
 
 		if !cmd.Flag("version").Changed {
 			for _, v := range vlist {
@@ -104,17 +110,32 @@ func execute(cmd *cobra.Command, args []string) {
 				log.Fatal("purpur doesn't support this version")
 			}
 		}
-	case "fabric":
+	case flags.Fabric.String():
 		vlist, err := fabric.GetVersionsList()
 		if err != nil {
 			log.Fatal(err)
 		}
+		loader.Stop()
 
 		for _, v := range vlist.Versions {
-			fmt.Printf("- %s:\n", v.Version)
+			fmt.Printf("- %s\n", v.Version)
+		}
+
+	case flags.Neoforge.String():
+		vlist, err := neoforge.GetVersionsList()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		slices.Reverse(vlist)
+		loader.Stop()
+
+		for _, v := range vlist {
+			fmt.Printf("- %s\n", v)
 		}
 
 	default:
-		log.Fatal(invalidServerType)
+		loader.Stop()
+		log.Fatal(utils.InvalidServerType)
 	}
 }

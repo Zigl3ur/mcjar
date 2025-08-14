@@ -10,10 +10,9 @@ import (
 	"github.com/Zigl3ur/mcli/internal/handlers/paper"
 	"github.com/Zigl3ur/mcli/internal/handlers/purpur"
 	"github.com/Zigl3ur/mcli/internal/handlers/vanilla"
+	"github.com/Zigl3ur/mcli/internal/utils"
 	"github.com/spf13/cobra"
 )
-
-const invalidServerType string = "Invalid server type, valid ones are [vanilla, paper, spigot, purpur, forge, fabric]"
 
 func NewCommand() *cobra.Command {
 	cmd := &cobra.Command{
@@ -66,6 +65,6 @@ func execute(cmd *cobra.Command, args []string) {
 			log.Fatal(err)
 		}
 	default:
-		log.Fatal(invalidServerType)
+		log.Fatal(utils.InvalidServerType)
 	}
 }
