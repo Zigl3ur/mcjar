@@ -7,6 +7,7 @@ import (
 
 	"github.com/Zigl3ur/mcli/internal/cli/flags"
 	"github.com/Zigl3ur/mcli/internal/handlers/fabric"
+	"github.com/Zigl3ur/mcli/internal/handlers/forge"
 	"github.com/Zigl3ur/mcli/internal/handlers/neoforge"
 	"github.com/Zigl3ur/mcli/internal/handlers/paper"
 	"github.com/Zigl3ur/mcli/internal/handlers/purpur"
@@ -55,20 +56,16 @@ func execute(cmd *cobra.Command, args []string) {
 
 		if !cmd.Flag("version").Changed {
 			for _, v := range vlist.Versions {
-				fmt.Printf("- %s:\n", v.Version.Id)
-				fmt.Println("  - builds:")
-				for _, b := range v.Builds {
-					fmt.Printf("\t- %d\n", b)
-				}
+				fmt.Printf("- %s\n", v.Version.Id)
 			}
 		} else {
 			found := false
 			for _, v := range vlist.Versions {
 				if v.Version.Id == version {
-					fmt.Printf("- %s:\n", version)
+					fmt.Printf("- %s\n", version)
 					fmt.Println("  - builds:")
 					for _, b := range v.Builds {
-						fmt.Printf("\t- %d\n", b)
+						fmt.Printf("    - %d\n", b)
 					}
 					found = true
 					break
@@ -85,30 +82,24 @@ func execute(cmd *cobra.Command, args []string) {
 			log.Fatal(err)
 		}
 		slices.Reverse(vlist)
-		loader.Stop()
 
 		if !cmd.Flag("version").Changed {
+			loader.Stop()
 			for _, v := range vlist {
-				fmt.Printf("- %s:\n", v)
-				fmt.Println("  - builds:")
-				builds, _ := purpur.GetBuildList(v)
-				slices.Reverse(builds)
-				for _, b := range builds {
-					fmt.Printf("\t- %s\n", b)
-				}
+				fmt.Printf("- %s\n", v)
+			}
+		} else if slices.Contains(vlist, version) {
+			builds, _ := purpur.GetBuildList(version)
+			slices.Reverse(builds)
+			loader.Stop()
+			fmt.Printf("- %s:\n", version)
+			fmt.Println("  - builds:")
+			for _, b := range builds {
+				fmt.Printf("\t- %s\n", b)
 			}
 		} else {
-			if slices.Contains(vlist, version) {
-				builds, _ := purpur.GetBuildList(version)
-				slices.Reverse(builds)
-				fmt.Printf("- %s:\n", version)
-				fmt.Println("  - builds:")
-				for _, b := range builds {
-					fmt.Printf("\t- %s\n", b)
-				}
-			} else {
-				log.Fatal("purpur doesn't support this version")
-			}
+			loader.Stop()
+			log.Fatal("purpur doesn't support this version")
 		}
 	case flags.Fabric.String():
 		vlist, err := fabric.GetVersionsList()
@@ -126,12 +117,40 @@ func execute(cmd *cobra.Command, args []string) {
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		slices.Reverse(vlist)
 		loader.Stop()
 
-		for _, v := range vlist {
-			fmt.Printf("- %s\n", v)
+		if !cmd.Flag("version").Changed {
+			for k := range vlist {
+				fmt.Printf("- %s\n", k)
+			}
+		} else if vlist[version] != nil {
+			fmt.Printf("- %s\n", version)
+			fmt.Println("  - builds:")
+			for _, b := range vlist[version] {
+				fmt.Printf("   - %s\n", b)
+			}
+		} else {
+			log.Fatal("purpur doesn't support this version")
+		}
+	case flags.Forge.String():
+		vlist, err := forge.GetVersionsList()
+		if err != nil {
+			log.Fatal(err)
+		}
+		loader.Stop()
+
+		if !cmd.Flag("version").Changed {
+			for k := range vlist {
+				fmt.Printf("- %s\n", k)
+			}
+		} else if vlist[version] != nil {
+			fmt.Printf("- %s\n", version)
+			fmt.Println("  - builds:")
+			for _, b := range vlist[version] {
+				fmt.Printf("   - %s\n", b)
+			}
+		} else {
+			log.Fatal("forge doesn't support this version")
 		}
 
 	default:

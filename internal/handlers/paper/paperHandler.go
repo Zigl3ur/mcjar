@@ -33,7 +33,7 @@ func getUrl(version, build string) (string, error) {
 	}
 
 	var paperUrl PaperUrl
-	if err := utils.GetReq(fetchUrl, &paperUrl); err != nil {
+	if err := utils.GetReqJson(fetchUrl, &paperUrl); err != nil {
 		return "", errors.New("failed to fetch version details")
 	}
 
@@ -60,7 +60,7 @@ type PaperVersions struct {
 func GetVersionsList() (PaperVersions, error) {
 
 	var versions PaperVersions
-	if err := utils.GetReq("https://fill.papermc.io/v3/projects/paper/versions", &versions); err != nil {
+	if err := utils.GetReqJson("https://fill.papermc.io/v3/projects/paper/versions", &versions); err != nil {
 		return versions, errors.New("failed to fetch paper versions")
 	}
 
@@ -74,7 +74,7 @@ type PaperBuild struct {
 func GetBuildList(version string) ([]PaperBuild, error) {
 
 	var builds []PaperBuild
-	if err := utils.GetReq(fmt.Sprintf("https://fill.papermc.io/v3/projects/paper/versions/%s/builds?channel=STABLE", version), &builds); err != nil {
+	if err := utils.GetReqJson(fmt.Sprintf("https://fill.papermc.io/v3/projects/paper/versions/%s/builds?channel=STABLE", version), &builds); err != nil {
 		return nil, errors.New("failed to fetch paper build list")
 	}
 

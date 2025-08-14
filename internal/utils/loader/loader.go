@@ -33,7 +33,7 @@ func Start(message string) {
 				case <-finish:
 					return
 				default:
-					fmt.Printf("\r%s %s ", g, loaderMsg)
+					fmt.Printf("\r%s %s", g, loaderMsg)
 					time.Sleep(time.Millisecond * 100)
 				}
 			}

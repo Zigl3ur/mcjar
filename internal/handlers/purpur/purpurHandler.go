@@ -50,7 +50,7 @@ func GetVersionsList() ([]string, error) {
 	}
 
 	var versions PurpurVersion
-	if err := utils.GetReq("https://api.purpurmc.org/v2/purpur", &versions); err != nil {
+	if err := utils.GetReqJson("https://api.purpurmc.org/v2/purpur", &versions); err != nil {
 		return nil, errors.New("failed to fetch version details")
 	}
 	return versions.List, nil
@@ -65,7 +65,7 @@ func GetBuildList(version string) ([]string, error) {
 	}
 
 	var builds PurpurBuilds
-	if err := utils.GetReq(fmt.Sprintf("https://api.purpurmc.org/v2/purpur/%s", version), &builds); err != nil {
+	if err := utils.GetReqJson(fmt.Sprintf("https://api.purpurmc.org/v2/purpur/%s", version), &builds); err != nil {
 		return nil, errors.New("failed to fetch purpur build list")
 	}
 

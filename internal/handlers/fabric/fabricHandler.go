@@ -40,7 +40,7 @@ type FabricVersion struct {
 func GetVersionsList() (FabricVersion, error) {
 
 	var versions FabricVersion
-	if err := utils.GetReq("https://meta.fabricmc.net/v2/versions", &versions); err != nil {
+	if err := utils.GetReqJson("https://meta.fabricmc.net/v2/versions", &versions); err != nil {
 		return versions, errors.New("failed to fetch fabric versions")
 	}
 
@@ -55,7 +55,7 @@ func GetStableLoader() (string, error) {
 	}
 
 	var list LoaderList
-	if err := utils.GetReq("https://meta.fabricmc.net/v2/versions/loader", &list); err != nil {
+	if err := utils.GetReqJson("https://meta.fabricmc.net/v2/versions/loader", &list); err != nil {
 		return "", errors.New("failed to fetch fabric loaders")
 	}
 
@@ -76,7 +76,7 @@ func GetStableInstaller() (string, error) {
 	}
 
 	var list InstallerList
-	if err := utils.GetReq("https://meta.fabricmc.net/v2/versions/installer", &list); err != nil {
+	if err := utils.GetReqJson("https://meta.fabricmc.net/v2/versions/installer", &list); err != nil {
 		return "", errors.New("failed to fetch fabric installer")
 	}
 

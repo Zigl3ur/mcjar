@@ -34,7 +34,7 @@ func getUrl(version, build string) (string, error) {
 	}
 
 	var paperUrl PaperUrl
-	if err := utils.GetReq(fetchUrl, &paperUrl); err != nil {
+	if err := utils.GetReqJson(fetchUrl, &paperUrl); err != nil {
 		return "", errors.New("failed to fetch version details")
 	}
 
@@ -46,36 +46,33 @@ func getUrl(version, build string) (string, error) {
 	return serverUrl, nil
 }
 
-func GetVersionsList() ([]string, error) {
+func GetVersionsList() (map[string][]string, error) {
 
 	type NeoforgeVersions struct {
 		Versions []string `json:"versions"`
 	}
 
 	var list NeoforgeVersions
-	if err := utils.GetReq("https://maven.neoforged.net/api/maven/versions/releases/net/neoforged/neoforge", &list); err != nil {
+	if err := utils.GetReqJson("https://maven.neoforged.net/api/maven/versions/releases/net/neoforged/neoforge", &list); err != nil {
 		return nil, errors.New("failed to fetch neoforge versions")
 	}
 
-	filteredVersions := []string{}
-	seenVer := make(map[string]bool)
+	versionMap := make(map[string][]string)
 
 	for _, v := range list.Versions {
 		// remove april fools versions
 		if !strings.HasPrefix(v, "0") {
 			parts := strings.SplitN(v, ".", 3)
-
+			fmt.Println(parts)
 			version := fmt.Sprintf("1.%s", parts[0])
+			build := strings.Join(parts, ".")
 			if len(parts) > 1 {
 				version = fmt.Sprintf("1.%s.%s", parts[0], parts[1])
 			}
+			versionMap[version] = append(versionMap[version], build)
 
-			if !seenVer[version] {
-				seenVer[version] = true
-				filteredVersions = append(filteredVersions, version)
-			}
 		}
 	}
 
-	return filteredVersions, nil
+	return versionMap, nil
 }

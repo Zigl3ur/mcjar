@@ -49,7 +49,7 @@ func getUrl(version string) (string, error) {
 	}
 
 	var downloadData DownloadData
-	if err := utils.GetReq(versionUrl, &downloadData); err != nil {
+	if err := utils.GetReqJson(versionUrl, &downloadData); err != nil {
 		return "", errors.New("failed to fetch version details")
 	}
 
@@ -64,7 +64,7 @@ func getUrl(version string) (string, error) {
 func GetVersionsList() (Versions, error) {
 
 	var versions Versions
-	if err := utils.GetReq("https://launchermeta.mojang.com/mc/game/version_manifest.json", &versions); err != nil {
+	if err := utils.GetReqJson("https://launchermeta.mojang.com/mc/game/version_manifest.json", &versions); err != nil {
 		return versions, errors.New("failed to fetch version manifest")
 	}
 

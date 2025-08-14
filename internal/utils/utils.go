@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"io"
@@ -61,7 +62,7 @@ func WriteToFs(url, path string) error {
 	return nil
 }
 
-func GetReq(url string, dataJson any) error {
+func GetReqJson(url string, dataJson any) error {
 	resp, err := http.Get(url)
 	if err != nil {
 		return err
@@ -75,3 +76,27 @@ func GetReq(url string, dataJson any) error {
 
 	return nil
 }
+
+func GetReqXml(url string, dataXml any) error {
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	if err := xml.NewDecoder(resp.Body).Decode(&dataXml); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// func SortMcVersion(unsorted []string) []string {
+// 	sorted := make([]string, 0)
+
+// 	for _, v := range unsorted {
+
+// 	}
+
+// }
