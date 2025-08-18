@@ -81,24 +81,22 @@ func execute(cmd *cobra.Command, args []string) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		slices.Reverse(vlist)
+
+		loader.Stop()
 
 		if !cmd.Flag("version").Changed {
-			loader.Stop()
 			for _, v := range vlist {
 				fmt.Printf("- %s\n", v)
 			}
 		} else if slices.Contains(vlist, version) {
 			builds, _ := purpur.GetBuildList(version)
 			slices.Reverse(builds)
-			loader.Stop()
 			fmt.Printf("- %s:\n", version)
 			fmt.Println("  - builds:")
 			for _, b := range builds {
 				fmt.Printf("\t- %s\n", b)
 			}
 		} else {
-			loader.Stop()
 			log.Fatal("purpur doesn't support this version")
 		}
 	case flags.Fabric.String():
@@ -125,12 +123,12 @@ func execute(cmd *cobra.Command, args []string) {
 			}
 		} else if vlist[version] != nil {
 			fmt.Printf("- %s\n", version)
-			fmt.Println("  - builds:")
+			fmt.Println("  - neoforge versions:")
 			for _, b := range vlist[version] {
-				fmt.Printf("   - %s\n", b)
+				fmt.Printf("    - %s\n", b)
 			}
 		} else {
-			log.Fatal("purpur doesn't support this version")
+			log.Fatal("neoforge doesn't support this version")
 		}
 	case flags.Forge.String():
 		vlist, err := forge.GetVersionsList()

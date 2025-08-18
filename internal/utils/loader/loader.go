@@ -8,7 +8,7 @@ import (
 
 var loaderGlyphs = []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
 var (
-	finish    chan bool
+	finish    chan struct{}
 	mu        sync.Mutex
 	loaderMsg string
 	running   bool
@@ -22,9 +22,10 @@ func Start(message string) {
 		return
 	}
 
-	finish = make(chan bool)
+	finish = make(chan struct{})
 	running = true
 	loaderMsg = message
+	ticker := time.NewTicker(100 * time.Millisecond)
 
 	go func() {
 		for {
@@ -32,9 +33,8 @@ func Start(message string) {
 				select {
 				case <-finish:
 					return
-				default:
+				case <-ticker.C:
 					fmt.Printf("\r%s %s", g, loaderMsg)
-					time.Sleep(time.Millisecond * 100)
 				}
 			}
 		}

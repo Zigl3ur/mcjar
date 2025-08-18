@@ -21,15 +21,15 @@ import (
 // 	return fmt.Sprintf("https://meta.fabricmc.net/v2/versions/loader/%s/%s/%s/server/jar", version, loader, installer), nil
 // }
 
-type ForgeVersions struct {
-	Versioning struct {
-		Latest   string   `xml:"latest"`
-		Release  string   `xml:"release"`
-		Versions []string `xml:"versions>version"`
-	} `xml:"versioning"`
-}
-
 func GetVersionsList() (map[string][]string, error) {
+	type ForgeVersions struct {
+		Versioning struct {
+			Latest   string   `xml:"latest"`
+			Release  string   `xml:"release"`
+			Versions []string `xml:"versions>version"`
+		} `xml:"versioning"`
+	}
+
 	var versions ForgeVersions
 	if err := utils.GetReqXml("https://maven.minecraftforge.net/net/minecraftforge/forge/maven-metadata.xml", &versions); err != nil {
 		return nil, errors.New("failed to fetch forge versions")

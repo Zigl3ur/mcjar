@@ -63,14 +63,12 @@ func GetVersionsList() (map[string][]string, error) {
 		// remove april fools versions
 		if !strings.HasPrefix(v, "0") {
 			parts := strings.SplitN(v, ".", 3)
-			fmt.Println(parts)
 			version := fmt.Sprintf("1.%s", parts[0])
 			build := strings.Join(parts, ".")
 			if len(parts) > 1 {
 				version = fmt.Sprintf("1.%s.%s", parts[0], parts[1])
 			}
 			versionMap[version] = append(versionMap[version], build)
-
 		}
 	}
 

@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/Zigl3ur/mcli/internal/utils/loader"
 )
@@ -17,6 +18,7 @@ const InvalidServerType string = "Invalid server type, valid ones are [vanilla, 
 type WriteCounter struct {
 	Total         uint64
 	ContentLength int64
+	StartTime     time.Time
 }
 
 func (wc *WriteCounter) Write(p []byte) (int, error) {
@@ -51,7 +53,7 @@ func WriteToFs(url, path string) error {
 
 	loader.Start("Download starting")
 
-	counter := &WriteCounter{ContentLength: resp.ContentLength}
+	counter := &WriteCounter{StartTime: time.Now(), ContentLength: resp.ContentLength}
 	if _, err = io.Copy(out, io.TeeReader(resp.Body, counter)); err != nil {
 		return errors.New("failed to copy file to fs")
 	}
@@ -91,12 +93,3 @@ func GetReqXml(url string, dataXml any) error {
 
 	return nil
 }
-
-// func SortMcVersion(unsorted []string) []string {
-// 	sorted := make([]string, 0)
-
-// 	for _, v := range unsorted {
-
-// 	}
-
-// }
