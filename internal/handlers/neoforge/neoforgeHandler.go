@@ -26,11 +26,11 @@ func getUrl(version, build string) (string, error) {
 	}
 
 	fetchUrl := fmt.Sprintf("https://fill.papermc.io/v3/projects/paper/versions/%s/builds/latest", version)
-	errorMsg := fmt.Errorf("no paper jar available for provided version (given: %s)", version)
+	errorMsg := fmt.Errorf("no neoforge jar available for provided version (given: %s)", version)
 
 	if build != "latest" {
 		fetchUrl = fmt.Sprintf("https://fill.papermc.io/v3/projects/paper/versions/%s/builds/%s", version, build)
-		errorMsg = fmt.Errorf("no paper jar available for provided version / build (given: %s, %s)", version, build)
+		errorMsg = fmt.Errorf("no neoforge jar available for provided version / build (given: %s, %s)", version, build)
 	}
 
 	var paperUrl PaperUrl

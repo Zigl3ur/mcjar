@@ -25,11 +25,17 @@ func (wc *WriteCounter) Write(p []byte) (int, error) {
 	n := len(p)
 	wc.Total += uint64(n)
 
+	var downloadSpeed string
+	since := time.Since(wc.StartTime).Seconds()
+	if since > 0 {
+		downloadSpeed = fmt.Sprintf("%s/s", humanizeByte(int64((float64(wc.Total) / since))))
+	}
+
 	if wc.ContentLength > 0 {
 		progress := int64(wc.Total*100) / wc.ContentLength
-		loader.UpdateMessage(fmt.Sprintf("Downloading: %02d%%", progress))
+		loader.UpdateMessage(fmt.Sprintf("Downloading: %02d%%, %s", progress, downloadSpeed))
 	} else {
-		loader.UpdateMessage(fmt.Sprintf("Downloading: %d bytes", wc.Total))
+		loader.UpdateMessage(fmt.Sprintf("Downloading: %d bytes, %s", wc.Total, downloadSpeed))
 	}
 
 	return n, nil
@@ -92,4 +98,17 @@ func GetReqXml(url string, dataXml any) error {
 	}
 
 	return nil
+}
+
+func humanizeByte(b int64) string {
+	const unit = 1000
+	if b < unit {
+		return fmt.Sprintf("%d B", b)
+	}
+	div, exp := int64(unit), 0
+	for n := b / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+	return fmt.Sprintf("%.1f %cB", float64(b)/float64(div), "kMGTPE"[exp])
 }

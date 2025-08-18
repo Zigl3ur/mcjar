@@ -9,4 +9,4 @@
 # Misc
 
 - [ ] Function to sort an array of minecraft versions
-- [ ] Display download speed
+- [x] Display download speed
