@@ -112,7 +112,7 @@ func humanizeByte(b int64) string {
 		div *= unit
 		exp++
 	}
-	return fmt.Sprintf("%.1f %cB", float64(b)/float64(div), "kMGTPE"[exp])
+	return fmt.Sprintf("%.1f %cB", float64(b)/float64(div), "kMGTP"[exp])
 }
 
 // TODO: work for now, but try to improve + tests
@@ -148,18 +148,17 @@ func SortMcVersions(versions []string) []string {
 func mcVersionParser(version string) ([3]int, error) {
 	parts := strings.SplitN(version, ".", 3)
 
+	if len(parts) < 2 {
+		return [3]int{}, errors.New("not a correct version format") // if it's a snapshot or like april fool ver or whatever that is not following the format "1.12.2"
+	}
+
 	var mainVersion, subVersion, patch int
 
-	if len(parts) >= 1 {
-		mainVersion, _ = strconv.Atoi(parts[0])
-	}
-	if len(parts) >= 2 {
-		subVersion, _ = strconv.Atoi(parts[1])
-	}
+	mainVersion, _ = strconv.Atoi(parts[0])
+	subVersion, _ = strconv.Atoi(parts[1])
+
 	if len(parts) >= 3 {
 		patch, _ = strconv.Atoi(parts[2])
-	} else {
-		return [3]int{}, errors.New("not a correct version format") // if it's a snaphsot or like april fool ver ot whatever that is not following the format "1.12.2"
 	}
 
 	return [3]int{mainVersion, subVersion, patch}, nil

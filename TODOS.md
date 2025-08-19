@@ -10,3 +10,4 @@
 
 - [ ] Function to sort an array of minecraft versions
 - [x] Display download speed
+- [ ] Add Tests
