@@ -32,7 +32,8 @@ func getUrl(version, build string) (string, error) {
 		return "", err
 	}
 
-	if build == "" {
+	if build == "latest" {
+		// if no build provided get the latest one
 		build = blist[len(blist)-1]
 	} else {
 		if !slices.Contains(blist, build) {
@@ -53,6 +54,8 @@ func GetVersionsList() ([]string, error) {
 	if err := utils.GetReqJson("https://api.purpurmc.org/v2/purpur", &versions); err != nil {
 		return nil, errors.New("failed to fetch version details")
 	}
+
+	slices.Reverse(versions.List)
 	return versions.List, nil
 }
 
@@ -68,6 +71,8 @@ func GetBuildList(version string) ([]string, error) {
 	if err := utils.GetReqJson(fmt.Sprintf("https://api.purpurmc.org/v2/purpur/%s", version), &builds); err != nil {
 		return nil, errors.New("failed to fetch purpur build list")
 	}
+
+	slices.Reverse(builds.Builds.List)
 
 	return builds.Builds.List, nil
 }

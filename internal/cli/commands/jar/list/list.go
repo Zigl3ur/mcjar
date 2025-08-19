@@ -81,7 +81,6 @@ func execute(cmd *cobra.Command, args []string) {
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		loader.Stop()
 
 		if !cmd.Flag("version").Changed {
