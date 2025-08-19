@@ -3,6 +3,7 @@ package list
 import (
 	"fmt"
 	"log"
+	"maps"
 	"slices"
 
 	"github.com/Zigl3ur/mcli/internal/cli/flags"
@@ -42,10 +43,16 @@ func execute(cmd *cobra.Command, args []string) {
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		strList := make([]string, 0, len(vlist.Versions))
+		for _, d := range vlist.Versions {
+			strList = append(strList, d.Id)
+		}
+		strList = utils.SortMcVersions(strList)
 		loader.Stop()
 
-		for _, v := range vlist.Versions {
-			fmt.Printf("- %s\n", v.Id)
+		for _, v := range strList {
+			fmt.Printf("- %s\n", v)
 		}
 	case flags.Paper.String():
 		vlist, err := paper.GetVersionsList()
@@ -55,6 +62,8 @@ func execute(cmd *cobra.Command, args []string) {
 		loader.Stop()
 
 		if !cmd.Flag("version").Changed {
+
+			// already sorted from api
 			for _, v := range vlist.Versions {
 				fmt.Printf("- %s\n", v.Version.Id)
 			}
@@ -84,6 +93,7 @@ func execute(cmd *cobra.Command, args []string) {
 		loader.Stop()
 
 		if !cmd.Flag("version").Changed {
+			// already sorted from api
 			for _, v := range vlist {
 				fmt.Printf("- %s\n", v)
 			}
@@ -105,6 +115,7 @@ func execute(cmd *cobra.Command, args []string) {
 		}
 		loader.Stop()
 
+		// already sorted from api
 		for _, v := range vlist.Versions {
 			fmt.Printf("- %s\n", v.Version)
 		}
@@ -114,11 +125,14 @@ func execute(cmd *cobra.Command, args []string) {
 		if err != nil {
 			log.Fatal(err)
 		}
+
 		loader.Stop()
 
 		if !cmd.Flag("version").Changed {
-			for k := range vlist {
-				fmt.Printf("- %s\n", k)
+			sortedVersion := utils.SortMcVersions(slices.Collect(maps.Keys(vlist)))
+
+			for _, v := range sortedVersion {
+				fmt.Printf("- %s\n", v)
 			}
 		} else if vlist[version] != nil {
 			fmt.Printf("- %s\n", version)
@@ -137,8 +151,9 @@ func execute(cmd *cobra.Command, args []string) {
 		loader.Stop()
 
 		if !cmd.Flag("version").Changed {
-			for k := range vlist {
-				fmt.Printf("- %s\n", k)
+			sortedVersion := utils.SortMcVersions(slices.Collect(maps.Keys(vlist)))
+			for _, v := range sortedVersion {
+				fmt.Printf("- %s\n", v)
 			}
 		} else if vlist[version] != nil {
 			fmt.Printf("- %s\n", version)

@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -16,6 +17,9 @@ import (
 )
 
 const InvalidServerType string = "Invalid server type, valid ones are [vanilla, paper, spigot, purpur, forge, neoforge, fabric]"
+
+// if its not following conventionnal release name like "1.12.2" (probably a snapshot or whatever april fools versions
+var mcVersionParseError error = errors.New("failed to parse mc version")
 
 type WriteCounter struct {
 	Total         uint64
@@ -103,7 +107,7 @@ func GetReqXml(url string, dataXml any) error {
 }
 
 func humanizeByte(b int64) string {
-	const unit = 1000
+	const unit = 1024
 	if b < unit {
 		return fmt.Sprintf("%d B", b)
 	}
@@ -112,53 +116,54 @@ func humanizeByte(b int64) string {
 		div *= unit
 		exp++
 	}
-	return fmt.Sprintf("%.1f %cB", float64(b)/float64(div), "kMGTP"[exp])
+	return fmt.Sprintf("%.1f %ciB", float64(b)/float64(div), "KMGTP"[exp])
 }
 
-// TODO: work for now, but try to improve + tests
 func SortMcVersions(versions []string) []string {
-	sortedVersion := make([]string, len(versions))
-	copy(sortedVersion, versions)
+	slices.SortStableFunc(versions, func(i, j string) int {
+		ver0, err0 := mcVersionParser(i)
+		ver1, err1 := mcVersionParser(j)
 
-	for i := 0; i < len(versions)-1; i++ {
-		for j := range sortedVersion {
-			sortedVer, err := mcVersionParser(sortedVersion[j])
-			if err != nil {
-				continue
-			}
-			unsortedVer, err := mcVersionParser(sortedVersion[i+1])
-			if err != nil {
-				continue
-			}
+		if err0 != nil || err1 != nil {
+			return 0
+		}
 
-			for idx := range 3 {
-				if unsortedVer[idx] < sortedVer[idx] {
-					sortedVersion[j], sortedVersion[i+1] = sortedVersion[i+1], sortedVersion[j]
-					break
-				} else if unsortedVer[idx] > sortedVer[idx] {
-					break
-				}
+		for idx := range 3 {
+			if ver0[idx] > ver1[idx] {
+				return -1
+			}
+			if ver0[idx] < ver1[idx] {
+				return 1
 			}
 		}
-	}
-
-	return sortedVersion
+		return 0
+	})
+	return versions
 }
 
 func mcVersionParser(version string) ([3]int, error) {
 	parts := strings.SplitN(version, ".", 3)
 
 	if len(parts) < 2 {
-		return [3]int{}, errors.New("not a correct version format") // if it's a snapshot or like april fool ver or whatever that is not following the format "1.12.2"
+		return [3]int{}, mcVersionParseError
 	}
 
 	var mainVersion, subVersion, patch int
 
-	mainVersion, _ = strconv.Atoi(parts[0])
-	subVersion, _ = strconv.Atoi(parts[1])
+	mainVersion, err := strconv.Atoi(parts[0])
+	if err != nil {
+		return [3]int{}, mcVersionParseError
+	}
+	subVersion, err = strconv.Atoi(parts[1])
+	if err != nil {
+		return [3]int{}, mcVersionParseError
+	}
 
 	if len(parts) >= 3 {
-		patch, _ = strconv.Atoi(parts[2])
+		patch, err = strconv.Atoi(parts[2])
+		if err != nil {
+			return [3]int{}, mcVersionParseError
+		}
 	}
 
 	return [3]int{mainVersion, subVersion, patch}, nil
