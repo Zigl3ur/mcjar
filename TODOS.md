@@ -8,6 +8,10 @@
 
 # Misc
 
-- [ ] Function to sort an array of minecraft versions
+- [x] Function to sort an array of minecraft versions
 - [x] Display download speed
 - [ ] Add Tests
+
+# Ideas
+
+- [ ] Debug flag (show better output ?)

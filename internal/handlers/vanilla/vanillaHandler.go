@@ -3,11 +3,40 @@ package vanilla
 import (
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/Zigl3ur/mcli/internal/utils"
+	"github.com/Zigl3ur/mcli/internal/utils/loader"
 )
 
-func Handler(version, path string) error {
+func VersionsListHandler(snapshots bool) {
+	rawList, err := getVersionsList()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	vlist := make([]string, 0, len(rawList.Versions))
+
+	for _, v := range rawList.Versions {
+		vlist = append(vlist, v.Id)
+	}
+
+	versionsMap := utils.SortMcVersions(vlist)
+
+	loader.Stop()
+
+	if !snapshots {
+		for _, v := range versionsMap["versions"] {
+			fmt.Printf("- %s\n", v)
+		}
+	} else {
+		for _, v := range versionsMap["snapshots"] {
+			fmt.Printf("- %s\n", v)
+		}
+	}
+}
+
+func JarHandler(version, path string) error {
 	url, err := getUrl(version)
 	if err != nil {
 		return err
@@ -23,7 +52,7 @@ type Versions struct {
 }
 
 func getUrl(version string) (string, error) {
-	versions, err := GetVersionsList()
+	versions, err := getVersionsList()
 	if err != nil {
 		return "", err
 	}
@@ -44,7 +73,7 @@ func getUrl(version string) (string, error) {
 		Downloads struct {
 			Server struct {
 				Url string `json:"url"`
-			} `json:"server"`
+			} `jsons:"server"`
 		} `json:"downloads"`
 	}
 
@@ -61,7 +90,7 @@ func getUrl(version string) (string, error) {
 	return serverUrl, nil
 }
 
-func GetVersionsList() (Versions, error) {
+func getVersionsList() (Versions, error) {
 
 	var versions Versions
 	if err := utils.GetReqJson("https://launchermeta.mojang.com/mc/game/version_manifest.json", &versions); err != nil {

@@ -3,12 +3,57 @@ package purpur
 import (
 	"errors"
 	"fmt"
+	"log"
 	"slices"
 
 	"github.com/Zigl3ur/mcli/internal/utils"
+	"github.com/Zigl3ur/mcli/internal/utils/loader"
 )
 
-func Handler(version, build, path string) error {
+func VersionsListHandler(version string, versionChanged, snapshots bool) {
+	rawList, err := getVersionsList()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	vlist := make([]string, 0, len(rawList))
+
+	for _, v := range rawList {
+		vlist = append(vlist, v)
+	}
+
+	versionsMap := utils.SortMcVersions(vlist)
+	loader.Stop()
+
+	if versionChanged {
+		if slices.Contains(versionsMap["versions"], version) || slices.Contains(versionsMap["snapshots"], version) {
+			blist, err := getBuildList(version)
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Printf("- %s\n", version)
+			for _, b := range blist {
+				fmt.Printf("  - %s\n", b)
+			}
+		} else {
+			log.Fatalf("purpur doesn't support this version (given: %s)", version)
+		}
+	} else if snapshots {
+		if len(versionsMap["snapshots"]) > 0 {
+			for _, s := range versionsMap["snapshots"] {
+				fmt.Printf("- %s\n", s)
+			}
+		} else {
+			log.Fatal("purpur doesn't support snapshots")
+		}
+	} else {
+		for _, v := range versionsMap["versions"] {
+			fmt.Printf("- %s\n", v)
+		}
+	}
+}
+
+func JarHandler(version, build, path string) error {
 	url, err := getUrl(version, build)
 	if err != nil {
 		return err
@@ -18,7 +63,7 @@ func Handler(version, build, path string) error {
 
 func getUrl(version, build string) (string, error) {
 
-	vlist, err := GetVersionsList()
+	vlist, err := getVersionsList()
 	if err != nil {
 		return "", err
 	}
@@ -27,7 +72,7 @@ func getUrl(version, build string) (string, error) {
 		return "", fmt.Errorf("no purpur jar available for provided version (given: %s)", version)
 	}
 
-	blist, err := GetBuildList(version)
+	blist, err := getBuildList(version)
 	if err != nil {
 		return "", err
 	}
@@ -44,7 +89,7 @@ func getUrl(version, build string) (string, error) {
 	return fmt.Sprintf("https://api.purpurmc.org/v2/purpur/%s/%s/download", version, build), nil
 }
 
-func GetVersionsList() ([]string, error) {
+func getVersionsList() ([]string, error) {
 
 	type PurpurVersion struct {
 		List []string `json:"versions"`
@@ -59,7 +104,7 @@ func GetVersionsList() ([]string, error) {
 	return versions.List, nil
 }
 
-func GetBuildList(version string) ([]string, error) {
+func getBuildList(version string) ([]string, error) {
 
 	type PurpurBuilds struct {
 		Builds struct {

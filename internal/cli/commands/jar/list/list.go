@@ -26,7 +26,8 @@ func NewCommand() *cobra.Command {
 	}
 
 	cmd.Flags().StringP("type", "t", "", "The server type to get version / builds list")
-	cmd.Flags().StringP("version", "v", "1.21", "The server version to get the list of builds")
+	cmd.Flags().StringP("version", "v", "1.21", "The server version to get the list of builds (if available)")
+	cmd.Flags().BoolP("snapshots", "s", false, "List snapshots versions (if any)")
 
 	return cmd
 }
@@ -34,113 +35,22 @@ func NewCommand() *cobra.Command {
 func execute(cmd *cobra.Command, args []string) {
 	serverType := cmd.Flag("type").Value.String()
 	version := cmd.Flag("version").Value.String()
+	snapshots, _ := cmd.Flags().GetBool("snapshots")
+	versionChanged := cmd.Flag("version").Changed
 
 	loader.Start(fmt.Sprintf("fetching %s versions", serverType))
 
 	switch serverType {
 	case flags.Vanilla.String():
-		vlist, err := vanilla.GetVersionsList()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		strList := make([]string, 0, len(vlist.Versions))
-		for _, d := range vlist.Versions {
-			strList = append(strList, d.Id)
-		}
-		loader.Stop()
-
-		for _, v := range strList {
-			fmt.Printf("- %s\n", v)
-		}
+		vanilla.VersionsListHandler(snapshots)
 	case flags.Paper.String():
-		vlist, err := paper.GetVersionsList()
-		if err != nil {
-			log.Fatal(err)
-		}
-		loader.Stop()
-
-		if !cmd.Flag("version").Changed {
-
-			// already sorted from api
-			for _, v := range vlist.Versions {
-				fmt.Printf("- %s\n", v.Version.Id)
-			}
-		} else {
-			found := false
-			for _, v := range vlist.Versions {
-				if v.Version.Id == version {
-					fmt.Printf("- %s\n", version)
-					fmt.Println("  - builds:")
-					for _, b := range v.Builds {
-						fmt.Printf("    - %d\n", b)
-					}
-					found = true
-					break
-				}
-			}
-			if !found {
-				log.Fatal("paper doesn't support this version")
-			}
-		}
-
+		paper.VersionsListHandler(version, versionChanged, snapshots)
 	case flags.Purpur.String():
-		vlist, err := purpur.GetVersionsList()
-		if err != nil {
-			log.Fatal(err)
-		}
-		loader.Stop()
-
-		if !cmd.Flag("version").Changed {
-			// already sorted from api
-			for _, v := range vlist {
-				fmt.Printf("- %s\n", v)
-			}
-		} else if slices.Contains(vlist, version) {
-			builds, _ := purpur.GetBuildList(version)
-			slices.Reverse(builds)
-			fmt.Printf("- %s:\n", version)
-			fmt.Println("  - builds:")
-			for _, b := range builds {
-				fmt.Printf("\t- %s\n", b)
-			}
-		} else {
-			log.Fatal("purpur doesn't support this version")
-		}
+		purpur.VersionsListHandler(version, versionChanged, snapshots)
 	case flags.Fabric.String():
-		vlist, err := fabric.GetVersionsList()
-		if err != nil {
-			log.Fatal(err)
-		}
-		loader.Stop()
-
-		// already sorted from api
-		for _, v := range vlist.Versions {
-			fmt.Printf("- %s\n", v.Version)
-		}
-
+		fabric.VersionsListHandler(version, snapshots)
 	case flags.Neoforge.String():
-		vlist, err := neoforge.GetVersionsList()
-		if err != nil {
-			log.Fatal(err)
-		}
-		loader.Stop()
-
-		if !cmd.Flag("version").Changed {
-			sortedVersion := utils.SortMcVersions(slices.Collect(maps.Keys(vlist)))
-
-			for _, v := range sortedVersion {
-				fmt.Printf("- %s\n", v)
-			}
-		} else if vlist[version] != nil {
-			fmt.Printf("- %s\n", version)
-			fmt.Println("  - neoforge versions:")
-			for _, b := range vlist[version] {
-				fmt.Printf("    - %s\n", b)
-			}
-		} else {
-			log.Fatal("neoforge doesn't support this version")
-		}
+		neoforge.VersionsListHandler(version, versionChanged, snapshots)
 	case flags.Forge.String():
 		vlist, err := forge.GetVersionsList()
 		if err != nil {
@@ -165,6 +75,6 @@ func execute(cmd *cobra.Command, args []string) {
 
 	default:
 		loader.Stop()
-		log.Fatal(utils.InvalidServerType)
+		cmd.Usage()
 	}
 }

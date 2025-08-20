@@ -3,11 +3,53 @@ package paper
 import (
 	"errors"
 	"fmt"
+	"log"
+	"slices"
 
 	"github.com/Zigl3ur/mcli/internal/utils"
+	"github.com/Zigl3ur/mcli/internal/utils/loader"
 )
 
-func Handler(version, build, path string) error {
+func VersionsListHandler(version string, versionChanged, snapshots bool) {
+	rawList, err := getVersionsList()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	vlist := make([]string, 0, len(rawList.Versions))
+
+	for _, v := range rawList.Versions {
+		vlist = append(vlist, v.Version.Id)
+	}
+
+	versionsMap := utils.SortMcVersions(vlist)
+	loader.Stop()
+
+	if versionChanged {
+		if slices.Contains(versionsMap["versions"], version) || slices.Contains(versionsMap["snapshots"], version) {
+			blist, err := getBuildList(version)
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Printf("- %s\n", version)
+			for _, b := range blist {
+				fmt.Printf("  - %d\n", b.Id)
+			}
+		} else {
+			log.Fatalf("paper doesnt support this version (given: %s)", version)
+		}
+	} else if snapshots {
+		for _, s := range versionsMap["snapshots"] {
+			fmt.Printf("- %s\n", s)
+		}
+	} else {
+		for _, v := range versionsMap["versions"] {
+			fmt.Printf("- %s\n", v)
+		}
+	}
+}
+
+func JarHandler(version, build, path string) error {
 	url, err := getUrl(version, build)
 	if err != nil {
 		return err
@@ -57,7 +99,7 @@ type PaperVersions struct {
 	} `json:"versions"`
 }
 
-func GetVersionsList() (PaperVersions, error) {
+func getVersionsList() (PaperVersions, error) {
 
 	var versions PaperVersions
 	if err := utils.GetReqJson("https://fill.papermc.io/v3/projects/paper/versions", &versions); err != nil {
@@ -71,7 +113,7 @@ type PaperBuild struct {
 	Id int `json:"id"`
 }
 
-func GetBuildList(version string) ([]PaperBuild, error) {
+func getBuildList(version string) ([]PaperBuild, error) {
 
 	var builds []PaperBuild
 	if err := utils.GetReqJson(fmt.Sprintf("https://fill.papermc.io/v3/projects/paper/versions/%s/builds?channel=STABLE", version), &builds); err != nil {

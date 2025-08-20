@@ -11,7 +11,6 @@ import (
 	"github.com/Zigl3ur/mcli/internal/handlers/paper"
 	"github.com/Zigl3ur/mcli/internal/handlers/purpur"
 	"github.com/Zigl3ur/mcli/internal/handlers/vanilla"
-	"github.com/Zigl3ur/mcli/internal/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -50,26 +49,26 @@ func execute(cmd *cobra.Command, args []string) {
 
 	switch serverType {
 	case flags.Vanilla.String():
-		if err := vanilla.Handler(version, output); err != nil {
+		if err := vanilla.JarHandler(version, output); err != nil {
 			log.Fatal(err)
 		}
 	case flags.Paper.String():
-		if err := paper.Handler(version, build, output); err != nil {
+		if err := paper.JarHandler(version, build, output); err != nil {
 			log.Fatal(err)
 		}
 	case flags.Purpur.String():
-		if err := purpur.Handler(version, build, output); err != nil {
+		if err := purpur.JarHandler(version, build, output); err != nil {
 			log.Fatal(err)
 		}
 	case flags.Fabric.String():
-		if err := fabric.Handler(version, output); err != nil {
+		if err := fabric.JarHandler(version, output); err != nil {
 			log.Fatal(err)
 		}
 	case flags.Neoforge.String():
-		if err := neoforge.Handler(version, build, output); err != nil {
+		if err := neoforge.JarHandler(version, build, output); err != nil {
 			log.Fatal(err)
 		}
 	default:
-		log.Fatal(utils.InvalidServerType)
+		cmd.Usage()
 	}
 }

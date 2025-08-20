@@ -3,50 +3,113 @@ package neoforge
 import (
 	"errors"
 	"fmt"
+	"log"
+	"os/exec"
+	"slices"
 	"strings"
 
 	"github.com/Zigl3ur/mcli/internal/utils"
+	"github.com/Zigl3ur/mcli/internal/utils/loader"
 )
 
-func Handler(version, build, path string) error {
+func VersionsListHandler(version string, versionChanged, snapshots bool) {
+	rawList, err := getVersionsList()
+	if err != nil {
+		log.Fatal(err)
+	}
+	loader.Stop()
+
+	vlist := make([]string, 0, len(rawList))
+
+	for k := range rawList {
+		vlist = append(vlist, k)
+	}
+
+	versionsMap := utils.SortMcVersions(vlist)
+	loader.Stop()
+
+	if versionChanged {
+		if slices.Contains(versionsMap["versions"], version) || slices.Contains(versionsMap["snapshots"], version) {
+			fmt.Printf("- %s\n", version)
+			for _, b := range rawList[version] {
+				fmt.Printf("  - %s\n", b)
+			}
+		} else {
+			log.Fatalf("paper doesnt support this version (given: %s)", version)
+		}
+	} else if snapshots {
+		if len(versionsMap["snapshots"]) > 0 {
+			for _, s := range versionsMap["snapshots"] {
+				fmt.Printf("- %s\n", s)
+			}
+		} else {
+			log.Fatal("neoforge doesn't support snapshots")
+		}
+	} else {
+		for _, v := range versionsMap["versions"] {
+			fmt.Printf("- %s\n", v)
+		}
+	}
+}
+
+func JarHandler(version, build, path string) error {
 	url, err := getUrl(version, build)
 	if err != nil {
 		return err
 	}
-	return utils.WriteToFs(url, path)
+
+	if err = utils.WriteToFs(url, path); err != nil {
+		return err
+	}
+
+	java, err := exec.LookPath("java")
+	if err != nil {
+		if errors.Is(err, exec.ErrNotFound) {
+			return errors.New("java not found in PATH, please install and retry.")
+		} else {
+			return err
+		}
+	}
+
+	destElt := strings.Split(path, "/")
+	dest := strings.Join(destElt[:len(destElt)-1], "/")
+	cmd := exec.Command(java, "-jar", path, "--install-server", dest)
+	loader.Start("Installing neoforge server")
+	// use cmd.Output ? if adding a debug flag and print output ?
+	err = cmd.Run()
+	if err != nil {
+		loader.Stop()
+		return errors.New("failed to install neoforge server")
+	}
+
+	loader.Stop()
+	fmt.Printf("Installed neoforge server at %s\n", dest)
+
+	return nil
 }
 
 func getUrl(version, build string) (string, error) {
-	type PaperUrl struct {
-		Downloads struct {
-			ServerDefault struct {
-				Url string `json:"url"`
-			} `json:"server:default"`
-		} `json:"downloads"`
+	vlist, err := getVersionsList()
+	if err != nil {
+		return "", err
 	}
 
-	fetchUrl := fmt.Sprintf("https://fill.papermc.io/v3/projects/paper/versions/%s/builds/latest", version)
-	errorMsg := fmt.Errorf("no neoforge jar available for provided version (given: %s)", version)
-
-	if build != "latest" {
-		fetchUrl = fmt.Sprintf("https://fill.papermc.io/v3/projects/paper/versions/%s/builds/%s", version, build)
-		errorMsg = fmt.Errorf("no neoforge jar available for provided version / build (given: %s, %s)", version, build)
+	if vlist[version] == nil {
+		return "", fmt.Errorf("no neoforge jar available for provided version (given: %s)", version)
 	}
 
-	var paperUrl PaperUrl
-	if err := utils.GetReqJson(fetchUrl, &paperUrl); err != nil {
-		return "", errors.New("failed to fetch version details")
+	url := fmt.Sprintf("https://maven.neoforged.net/releases/net/neoforged/neoforge/%s/neoforge-%s-installer.jar", vlist[version][0], vlist[version][0])
+
+	if build != "latest" && slices.Contains(vlist[version], build) {
+		url = fmt.Sprintf("https://maven.neoforged.net/releases/net/neoforged/neoforge/%s/neoforge-%s-installer.jar", build, build)
+	} else {
+		return "", fmt.Errorf("no neoforge jar available for provided version / neoforge version (given: %s, %s)", version, build)
 	}
 
-	serverUrl := paperUrl.Downloads.ServerDefault.Url
-	if serverUrl == "" {
-		return "", errorMsg
-	}
-
-	return serverUrl, nil
+	return url, nil
 }
 
-func GetVersionsList() (map[string][]string, error) {
+func getVersionsList() (map[string][]string, error) {
 
 	type NeoforgeVersions struct {
 		Versions []string `json:"versions"`
@@ -70,6 +133,10 @@ func GetVersionsList() (map[string][]string, error) {
 			}
 			versionMap[version] = append(versionMap[version], build)
 		}
+	}
+
+	for k := range versionMap {
+		slices.Reverse(versionMap[k])
 	}
 
 	return versionMap, nil

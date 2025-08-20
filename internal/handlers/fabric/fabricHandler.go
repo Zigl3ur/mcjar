@@ -3,11 +3,39 @@ package fabric
 import (
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/Zigl3ur/mcli/internal/utils"
+	"github.com/Zigl3ur/mcli/internal/utils/loader"
 )
 
-func Handler(version, path string) error {
+func VersionsListHandler(version string, snapshots bool) {
+	rawList, err := getVersionsList()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	vlist := make([]string, 0, len(rawList.Versions))
+
+	for _, v := range rawList.Versions {
+		vlist = append(vlist, v.Version)
+	}
+
+	versionsMap := utils.SortMcVersions(vlist)
+	loader.Stop()
+
+	if !snapshots {
+		for _, v := range versionsMap["versions"] {
+			fmt.Printf("- %s\n", v)
+		}
+	} else {
+		for _, s := range versionsMap["snapshots"] {
+			fmt.Printf("- %s\n", s)
+		}
+	}
+}
+
+func JarHandler(version, path string) error {
 	url, err := getUrl(version)
 	if err != nil {
 		return err
@@ -17,12 +45,12 @@ func Handler(version, path string) error {
 }
 
 func getUrl(version string) (string, error) {
-	loader, err := GetStableLoader()
+	loader, err := getStableLoader()
 	if err != nil {
 		return "", err
 	}
 
-	installer, err := GetStableInstaller()
+	installer, err := getStableInstaller()
 	if err != nil {
 		return "", err
 	}
@@ -37,7 +65,7 @@ type FabricVersion struct {
 	} `json:"game"`
 }
 
-func GetVersionsList() (FabricVersion, error) {
+func getVersionsList() (FabricVersion, error) {
 
 	var versions FabricVersion
 	if err := utils.GetReqJson("https://meta.fabricmc.net/v2/versions", &versions); err != nil {
@@ -47,7 +75,7 @@ func GetVersionsList() (FabricVersion, error) {
 	return versions, nil
 }
 
-func GetStableLoader() (string, error) {
+func getStableLoader() (string, error) {
 
 	type LoaderList []struct {
 		Version string `json:"version"`
@@ -68,7 +96,7 @@ func GetStableLoader() (string, error) {
 	return "", errors.New("no stable fabric loader found")
 }
 
-func GetStableInstaller() (string, error) {
+func getStableInstaller() (string, error) {
 
 	type InstallerList []struct {
 		Version string `json:"version"`
