@@ -35,7 +35,7 @@ func VersionsListHandler(version string, versionChanged, snapshots bool) {
 				fmt.Printf("  - %s\n", b)
 			}
 		} else {
-			log.Fatalf("paper doesnt support this version (given: %s)", version)
+			log.Fatalf("neoforge doesnt support this version (given: %s)", version)
 		}
 	} else if snapshots {
 		if len(versionsMap["snapshots"]) > 0 {

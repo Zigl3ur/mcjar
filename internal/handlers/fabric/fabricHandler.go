@@ -105,7 +105,7 @@ func getStableInstaller() (string, error) {
 
 	var list InstallerList
 	if err := utils.GetReqJson("https://meta.fabricmc.net/v2/versions/installer", &list); err != nil {
-		return "", errors.New("failed to fetch fabric installer")
+		return "", errors.New("failed to fetch fabric installers")
 	}
 
 	for _, l := range list {
