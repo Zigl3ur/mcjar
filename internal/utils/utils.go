@@ -119,14 +119,23 @@ func humanizeByte(b int64) string {
 	return fmt.Sprintf("%.1f %ciB", float64(b)/float64(div), "KMGTP"[exp])
 }
 
-func SortMcVersions(versions []string) []string {
-	slices.SortStableFunc(versions, func(i, j string) int {
-		ver0, err0 := mcVersionParser(i)
-		ver1, err1 := mcVersionParser(j)
+func SortMcVersions(versions []string) map[string][]string {
+	versionsData := make(map[string][]string, 2)
+	versionsData["versions"] = make([]string, 0)
+	versionsData["snapshots"] = make([]string, 0)
 
-		if err0 != nil || err1 != nil {
-			return 0
+	for _, version := range versions {
+		_, unparsed := mcVersionParser(version)
+		if unparsed != "" {
+			versionsData["snapshots"] = append(versionsData["snapshots"], version)
+		} else {
+			versionsData["versions"] = append(versionsData["versions"], version)
 		}
+	}
+
+	slices.SortStableFunc(versionsData["versions"], func(i, j string) int {
+		ver0, _ := mcVersionParser(i)
+		ver1, _ := mcVersionParser(j)
 
 		for idx := range 3 {
 			if ver0[idx] > ver1[idx] {
@@ -136,35 +145,37 @@ func SortMcVersions(versions []string) []string {
 				return 1
 			}
 		}
+
 		return 0
 	})
-	return versions
+
+	return versionsData
 }
 
-func mcVersionParser(version string) ([3]int, error) {
+func mcVersionParser(version string) ([3]int, string) {
 	parts := strings.SplitN(version, ".", 3)
 
 	if len(parts) < 2 {
-		return [3]int{}, mcVersionParseError
+		return [3]int{}, version
 	}
 
 	var mainVersion, subVersion, patch int
 
 	mainVersion, err := strconv.Atoi(parts[0])
 	if err != nil {
-		return [3]int{}, mcVersionParseError
+		return [3]int{}, version
 	}
 	subVersion, err = strconv.Atoi(parts[1])
 	if err != nil {
-		return [3]int{}, mcVersionParseError
+		return [3]int{}, version
 	}
 
 	if len(parts) >= 3 {
 		patch, err = strconv.Atoi(parts[2])
 		if err != nil {
-			return [3]int{}, mcVersionParseError
+			return [3]int{}, version
 		}
 	}
 
-	return [3]int{mainVersion, subVersion, patch}, nil
+	return [3]int{mainVersion, subVersion, patch}, ""
 }

@@ -12,20 +12,24 @@ type testData[T any, E any] struct {
 }
 
 func TestMcVersionParser(t *testing.T) {
-	tests := []testData[string, [3]int]{
-		{"1.8.9", [3]int{1, 8, 9}, false},
-		{"1.12.2", [3]int{1, 12, 2}, false},
-		{"1.10", [3]int{1, 10, 0}, false},
-		{"24w5a", [3]int{0, 0, 0}, true},
-		{"24w5a.12.ZAE", [3]int{0, 0, 0}, true},
-		{"", [3]int{0, 0, 0}, true},
+	tests := []struct {
+		given    string
+		expected [3]int
+		unparsed string
+	}{
+		{"1.8.9", [3]int{1, 8, 9}, ""},
+		{"1.12.2", [3]int{1, 12, 2}, ""},
+		{"1.10", [3]int{1, 10, 0}, ""},
+		{"24w5a", [3]int{0, 0, 0}, "24w5a"},
+		{"24w5a.12.ZAE", [3]int{0, 0, 0}, "24w5a.12.ZAE"},
+		{"", [3]int{0, 0, 0}, ""},
 	}
 
 	for _, tt := range tests {
-		result, err := mcVersionParser(tt.given)
+		result, unparsed := mcVersionParser(tt.given)
 
-		if (err != nil) != tt.err {
-			t.Errorf("McVersionParser(%s): got error = %t, want error = %t", tt.given, err != nil, tt.err)
+		if unparsed != tt.unparsed {
+			t.Errorf("got %s, expected %s", unparsed, tt.unparsed)
 		}
 
 		if result != tt.expected {
@@ -36,18 +40,17 @@ func TestMcVersionParser(t *testing.T) {
 }
 
 func TestSortMcVersions(t *testing.T) {
-	tests := []testData[[]string, []string]{
-		{[]string{"1.21.6", "1.8.9", "23w6a", "1.12.2", "1.7.2_pre4", "23w8b"}, []string{
-			"1.21.6", "1.12.2", "1.8.9", "23w6a", "1.7.2_pre4", "23w8b"}, false},
-		{[]string{"1.9", "1.10.2", "1.4.3"}, []string{"1.10.2", "1.9", "1.4.3"}, false},
-		{[]string{"1.21.6", "23w6a", "1.21.6"}, []string{"1.21.6", "23w6a", "1.21.6"}, false},
-		{[]string{"21E", " "}, []string{"21E", " "}, false},
-		{[]string{""}, []string{""}, false},
+	tests := []testData[[]string, map[string][]string]{
+		{[]string{"1.21.6", "1.8.9", "23w6a", "1.12.2", "1.7.2_pre4", "23w8b"}, map[string][]string{"versions": {"1.21.6", "1.12.2", "1.8.9"}, "snapshots": {"23w6a", "1.7.2_pre4", "23w8b"}}, false},
+		{[]string{"1.9", "1.10.2", "1.4.3"}, map[string][]string{"versions": {"1.10.2", "1.9", "1.4.3"}, "snapshots": {}}, false},
+		{[]string{"1.21.6", "23w6a", "1.21.6"}, map[string][]string{"versions": {"1.21.6", "1.21.6"}, "snapshots": {"23w6a"}}, false},
+		{[]string{"21E", " "}, map[string][]string{"versions": {}, "snapshots": {"21E", " "}}, false},
+		{[]string{""}, map[string][]string{"version": {}, "snapshots": {}}, false},
 	}
 
 	for _, tt := range tests {
 		result := SortMcVersions(tt.given)
-		if !slices.Equal(result, tt.expected) {
+		if !slices.Equal(result["version"], tt.expected["version"]) || !slices.Equal(result["snapshots"], tt.expected["snapshots"]) {
 			t.Errorf("got %s expected %s", result, tt.expected)
 		}
 	}

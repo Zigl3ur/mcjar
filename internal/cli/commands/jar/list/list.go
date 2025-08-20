@@ -48,7 +48,6 @@ func execute(cmd *cobra.Command, args []string) {
 		for _, d := range vlist.Versions {
 			strList = append(strList, d.Id)
 		}
-		strList = utils.SortMcVersions(strList)
 		loader.Stop()
 
 		for _, v := range strList {
@@ -125,7 +124,6 @@ func execute(cmd *cobra.Command, args []string) {
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		loader.Stop()
 
 		if !cmd.Flag("version").Changed {
