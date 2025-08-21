@@ -58,7 +58,15 @@ func execute(cmd *cobra.Command, args []string) {
 			log.Fatal(err)
 		}
 	case flags.Paper.String():
-		if err := paper.JarHandler(version, build, output); err != nil {
+		if err := paper.JarHandler(flags.Paper.String(), version, build, output); err != nil {
+			log.Fatal(err)
+		}
+	case flags.Folia.String():
+		if err := paper.JarHandler(flags.Folia.String(), version, build, output); err != nil {
+			log.Fatal(err)
+		}
+	case flags.Velocity.String():
+		if err := paper.JarHandler(flags.Velocity.String(), version, build, output); err != nil {
 			log.Fatal(err)
 		}
 	case flags.Purpur.String():

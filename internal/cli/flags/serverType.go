@@ -5,6 +5,8 @@ type ServerType string
 const (
 	Vanilla  ServerType = "vanilla"
 	Paper    ServerType = "paper"
+	Folia    ServerType = "folia"
+	Velocity ServerType = "velocity"
 	Purpur   ServerType = "purpur"
 	Fabric   ServerType = "fabric"
 	Neoforge ServerType = "neoforge"

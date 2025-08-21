@@ -42,7 +42,11 @@ func execute(cmd *cobra.Command, args []string) {
 	case flags.Vanilla.String():
 		vanilla.ListHandler(snapshots)
 	case flags.Paper.String():
-		paper.ListHandler(version, versionChanged, snapshots)
+		paper.ListHandler(flags.Paper.String(), version, versionChanged, snapshots)
+	case flags.Folia.String():
+		paper.ListHandler(flags.Folia.String(), version, versionChanged, snapshots)
+	case flags.Velocity.String():
+		paper.ListHandler(flags.Velocity.String(), version, versionChanged, snapshots)
 	case flags.Purpur.String():
 		purpur.ListHandler(version, versionChanged, snapshots)
 	case flags.Fabric.String():

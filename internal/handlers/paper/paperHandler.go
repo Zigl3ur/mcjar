@@ -10,8 +10,8 @@ import (
 	"github.com/Zigl3ur/mcli/internal/utils/loader"
 )
 
-func ListHandler(version string, versionChanged, snapshots bool) {
-	rawList, err := getVersionsList()
+func ListHandler(project, version string, versionChanged, snapshots bool) {
+	rawList, err := getVersionsList(project)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -27,7 +27,7 @@ func ListHandler(version string, versionChanged, snapshots bool) {
 
 	if versionChanged {
 		if slices.Contains(versionsMap["versions"], version) || slices.Contains(versionsMap["snapshots"], version) {
-			blist, err := getBuildList(version)
+			blist, err := getBuildList(project, version)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -39,8 +39,12 @@ func ListHandler(version string, versionChanged, snapshots bool) {
 			log.Fatalf("paper doesnt support this version (given: %s)", version)
 		}
 	} else if snapshots {
-		for _, s := range versionsMap["snapshots"] {
-			fmt.Printf("- %s\n", s)
+		if len(versionsMap["snapshots"]) > 0 {
+			for _, s := range versionsMap["snapshots"] {
+				fmt.Printf("- %s\n", s)
+			}
+		} else {
+			log.Fatalf("%s doesn't support snapshots", project)
 		}
 	} else {
 		for _, v := range versionsMap["versions"] {
@@ -49,15 +53,15 @@ func ListHandler(version string, versionChanged, snapshots bool) {
 	}
 }
 
-func JarHandler(version, build, path string) error {
-	url, err := getUrl(version, build)
+func JarHandler(project, version, build, path string) error {
+	url, err := getUrl(project, version, build)
 	if err != nil {
 		return err
 	}
 	return utils.WriteToFs(url, path)
 }
 
-func getUrl(version, build string) (string, error) {
+func getUrl(project, version, build string) (string, error) {
 	type PaperUrl struct {
 		Downloads struct {
 			ServerDefault struct {
@@ -66,12 +70,12 @@ func getUrl(version, build string) (string, error) {
 		} `json:"downloads"`
 	}
 
-	fetchUrl := fmt.Sprintf("https://fill.papermc.io/v3/projects/paper/versions/%s/builds/latest", version)
-	errorMsg := fmt.Errorf("no paper jar available for provided version (given: %s)", version)
+	fetchUrl := fmt.Sprintf("https://fill.papermc.io/v3/projects/%s/versions/%s/builds/latest", project, version)
+	errorMsg := fmt.Errorf("no %s jar available for provided version (given: %s)", project, version)
 
 	if build != "latest" {
-		fetchUrl = fmt.Sprintf("https://fill.papermc.io/v3/projects/paper/versions/%s/builds/%s", version, build)
-		errorMsg = fmt.Errorf("no paper jar available for provided version / build (given: %s, %s)", version, build)
+		fetchUrl = fmt.Sprintf("https://fill.papermc.io/v3/projects/%s/versions/%s/builds/%s", project, version, build)
+		errorMsg = fmt.Errorf("no %s jar available for provided version / build (given: %s, %s)", project, version, build)
 	}
 
 	var paperUrl PaperUrl
@@ -99,11 +103,11 @@ type PaperVersions struct {
 	} `json:"versions"`
 }
 
-func getVersionsList() (PaperVersions, error) {
+func getVersionsList(project string) (PaperVersions, error) {
 
 	var versions PaperVersions
-	if err := utils.GetReqJson("https://fill.papermc.io/v3/projects/paper/versions", &versions); err != nil {
-		return versions, errors.New("failed to fetch paper versions")
+	if err := utils.GetReqJson(fmt.Sprintf("https://fill.papermc.io/v3/projects/%s/versions", project), &versions); err != nil {
+		return versions, fmt.Errorf("failed to fetch %s version list")
 	}
 
 	return versions, nil
@@ -113,11 +117,11 @@ type PaperBuild struct {
 	Id int `json:"id"`
 }
 
-func getBuildList(version string) ([]PaperBuild, error) {
+func getBuildList(project, version string) ([]PaperBuild, error) {
 
 	var builds []PaperBuild
-	if err := utils.GetReqJson(fmt.Sprintf("https://fill.papermc.io/v3/projects/paper/versions/%s/builds?channel=STABLE", version), &builds); err != nil {
-		return nil, errors.New("failed to fetch paper build list")
+	if err := utils.GetReqJson(fmt.Sprintf("https://fill.papermc.io/v3/projects/%s/versions/%s/builds?channel=STABLE", project, version), &builds); err != nil {
+		return nil, fmt.Errorf("failed to fetch %s build list", project)
 	}
 
 	return builds, nil
