@@ -7,6 +7,7 @@ import (
 	"github.com/Zigl3ur/mcli/internal/cli/commands/jar/list"
 	"github.com/Zigl3ur/mcli/internal/cli/flags"
 	"github.com/Zigl3ur/mcli/internal/handlers/fabric"
+	"github.com/Zigl3ur/mcli/internal/handlers/forge"
 	"github.com/Zigl3ur/mcli/internal/handlers/neoforge"
 	"github.com/Zigl3ur/mcli/internal/handlers/paper"
 	"github.com/Zigl3ur/mcli/internal/handlers/purpur"
@@ -66,6 +67,10 @@ func execute(cmd *cobra.Command, args []string) {
 		}
 	case flags.Neoforge.String():
 		if err := neoforge.JarHandler(version, build, output); err != nil {
+			log.Fatal(err)
+		}
+	case flags.Forge.String():
+		if err := forge.JarHandler(version, build, output); err != nil {
 			log.Fatal(err)
 		}
 	default:

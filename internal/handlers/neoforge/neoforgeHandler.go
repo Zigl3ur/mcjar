@@ -12,7 +12,7 @@ import (
 	"github.com/Zigl3ur/mcli/internal/utils/loader"
 )
 
-func VersionsListHandler(version string, versionChanged, snapshots bool) {
+func ListHandler(version string, versionChanged, snapshots bool) {
 	rawList, err := getVersionsList()
 	if err != nil {
 		log.Fatal(err)
@@ -62,13 +62,9 @@ func JarHandler(version, build, path string) error {
 		return err
 	}
 
-	java, err := exec.LookPath("java")
+	java, err := utils.GetJava()
 	if err != nil {
-		if errors.Is(err, exec.ErrNotFound) {
-			return errors.New("java not found in PATH, please install and retry.")
-		} else {
-			return err
-		}
+		return err
 	}
 
 	destElt := strings.Split(path, "/")
@@ -76,8 +72,7 @@ func JarHandler(version, build, path string) error {
 	cmd := exec.Command(java, "-jar", path, "--install-server", dest)
 	loader.Start("Installing neoforge server")
 	// use cmd.Output ? if adding a debug flag and print output ?
-	err = cmd.Run()
-	if err != nil {
+	if err = cmd.Run(); err != nil {
 		loader.Stop()
 		return errors.New("failed to install neoforge server")
 	}
@@ -100,10 +95,12 @@ func getUrl(version, build string) (string, error) {
 
 	url := fmt.Sprintf("https://maven.neoforged.net/releases/net/neoforged/neoforge/%s/neoforge-%s-installer.jar", vlist[version][0], vlist[version][0])
 
-	if build != "latest" && slices.Contains(vlist[version], build) {
-		url = fmt.Sprintf("https://maven.neoforged.net/releases/net/neoforged/neoforge/%s/neoforge-%s-installer.jar", build, build)
-	} else {
-		return "", fmt.Errorf("no neoforge jar available for provided version / neoforge version (given: %s, %s)", version, build)
+	if build != "latest" {
+		if slices.Contains(vlist[version], build) {
+			url = fmt.Sprintf("https://maven.neoforged.net/releases/net/neoforged/neoforge/%s/neoforge-%s-installer.jar", build, build)
+		} else {
+			return "", fmt.Errorf("no neoforge jar available for provided version / neoforge version (given: %s, %s)", version, build)
+		}
 	}
 
 	return url, nil

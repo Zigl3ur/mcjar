@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"os/exec"
 	"slices"
 	"strconv"
 	"strings"
@@ -17,9 +18,6 @@ import (
 )
 
 const InvalidServerType string = "Invalid server type, valid ones are [vanilla, paper, spigot, purpur, forge, neoforge, fabric]"
-
-// if its not following conventionnal release name like "1.12.2" (probably a snapshot or whatever april fools versions
-var mcVersionParseError error = errors.New("failed to parse mc version")
 
 type WriteCounter struct {
 	Total         uint64
@@ -67,7 +65,7 @@ func WriteToFs(url, path string) error {
 
 	counter := &WriteCounter{StartTime: time.Now(), ContentLength: resp.ContentLength}
 	if _, err = io.Copy(out, io.TeeReader(resp.Body, counter)); err != nil {
-		return errors.New("failed to copy file to fs")
+		return errors.New("failed to create file")
 	}
 
 	loader.Stop()
@@ -178,4 +176,17 @@ func mcVersionParser(version string) ([3]int, string) {
 	}
 
 	return [3]int{mainVersion, subVersion, patch}, ""
+}
+
+func GetJava() (string, error) {
+	java, err := exec.LookPath("java")
+	if err != nil {
+		if errors.Is(err, exec.ErrNotFound) {
+			return "", errors.New("java not found in PATH, please install it and retry.")
+		} else {
+			return "", err
+		}
+	}
+
+	return java, nil
 }

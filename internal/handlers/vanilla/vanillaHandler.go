@@ -9,7 +9,7 @@ import (
 	"github.com/Zigl3ur/mcli/internal/utils/loader"
 )
 
-func VersionsListHandler(snapshots bool) {
+func ListHandler(snapshots bool) {
 	rawList, err := getVersionsList()
 	if err != nil {
 		log.Fatal(err)

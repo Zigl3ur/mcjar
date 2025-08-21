@@ -42,15 +42,15 @@ func execute(cmd *cobra.Command, args []string) {
 
 	switch serverType {
 	case flags.Vanilla.String():
-		vanilla.VersionsListHandler(snapshots)
+		vanilla.ListHandler(snapshots)
 	case flags.Paper.String():
-		paper.VersionsListHandler(version, versionChanged, snapshots)
+		paper.ListHandler(version, versionChanged, snapshots)
 	case flags.Purpur.String():
-		purpur.VersionsListHandler(version, versionChanged, snapshots)
+		purpur.ListHandler(version, versionChanged, snapshots)
 	case flags.Fabric.String():
-		fabric.VersionsListHandler(version, snapshots)
+		fabric.ListHandler(version, snapshots)
 	case flags.Neoforge.String():
-		neoforge.VersionsListHandler(version, versionChanged, snapshots)
+		neoforge.ListHandler(version, versionChanged, snapshots)
 	case flags.Forge.String():
 		vlist, err := forge.GetVersionsList()
 		if err != nil {
