@@ -86,6 +86,7 @@ func execute(cmd *cobra.Command, args []string) {
 			log.Fatal(err)
 		}
 	default:
+		//nolint:errcheck
 		cmd.Usage()
 	}
 }

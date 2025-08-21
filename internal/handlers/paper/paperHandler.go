@@ -107,7 +107,7 @@ func getVersionsList(project string) (PaperVersions, error) {
 
 	var versions PaperVersions
 	if err := utils.GetReqJson(fmt.Sprintf("https://fill.papermc.io/v3/projects/%s/versions", project), &versions); err != nil {
-		return versions, fmt.Errorf("failed to fetch %s version list")
+		return versions, fmt.Errorf("failed to fetch %s version list", project)
 	}
 
 	return versions, nil

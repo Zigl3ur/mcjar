@@ -18,9 +18,7 @@ func ListHandler(version string, versionChanged, snapshots bool) {
 
 	vlist := make([]string, 0, len(rawList))
 
-	for _, v := range rawList {
-		vlist = append(vlist, v)
-	}
+	vlist = append(vlist, rawList...)
 
 	versionsMap := utils.SortMcVersions(vlist)
 	loader.Stop()

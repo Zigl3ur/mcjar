@@ -52,6 +52,7 @@ func WriteToFs(url, path string) error {
 		return errors.New("failed to download jar")
 	}
 
+	//nolint:errcheck
 	defer resp.Body.Close()
 
 	out, err := os.Create(path)
@@ -59,6 +60,7 @@ func WriteToFs(url, path string) error {
 		return errors.New("failed to create file")
 	}
 
+	//nolint:errcheck
 	defer out.Close()
 
 	loader.Start("Download starting")
@@ -80,6 +82,7 @@ func GetReqJson(url string, dataJson any) error {
 		return err
 	}
 
+	//nolint:errcheck
 	defer resp.Body.Close()
 
 	if err := json.NewDecoder(resp.Body).Decode(&dataJson); err != nil {
@@ -95,6 +98,7 @@ func GetReqXml(url string, dataXml any) error {
 		return err
 	}
 
+	//nolint:errcheck
 	defer resp.Body.Close()
 
 	if err := xml.NewDecoder(resp.Body).Decode(&dataXml); err != nil {
@@ -182,7 +186,7 @@ func GetPath(file string) (string, error) {
 	path, err := exec.LookPath(file)
 	if err != nil {
 		if errors.Is(err, exec.ErrNotFound) {
-			return "", fmt.Errorf("%s not found in PATH, please install it and retry.", file)
+			return "", fmt.Errorf("%s not found in PATH, please install it and retry", file)
 		} else {
 			return "", err
 		}

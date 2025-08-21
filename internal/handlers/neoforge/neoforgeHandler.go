@@ -71,7 +71,6 @@ func JarHandler(version, build, path string) error {
 	dest := strings.Join(destElt[:len(destElt)-1], "/")
 	cmd := exec.Command(java, "-jar", path, "--install-server", dest)
 	loader.Start("Installing neoforge server")
-	// use cmd.Output ? if adding a debug flag and print output ?
 	// cmd.Stdout = os.Stdout
 	if err = cmd.Run(); err != nil {
 		loader.Stop()

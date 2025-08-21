@@ -57,6 +57,8 @@ func execute(cmd *cobra.Command, args []string) {
 		forge.ListHandler(version, versionChanged, snapshots)
 	default:
 		loader.Stop()
+
+		//nolint:errcheck
 		cmd.Usage()
 	}
 }

@@ -5,13 +5,13 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/Zigl3ur/mcli/internal/cli/commands/jar"
 	"github.com/spf13/cobra"
 )
 
-// rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "mcli",
 	Short: "Simple cli tool to easily manage minecraft server",
@@ -27,8 +27,8 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().BoolP("debug", "b", false, "show debug logs")
-	rootCmd.Flags().BoolP("version", "v", false, "display mcli version")
+	rootCmd.Flags().BoolP("verbose", "v", false, "show debug logs")
+	rootCmd.Flags().Bool("version", false, "display mcli version")
 
 	rootCmd.Flags().SortFlags = false
 	rootCmd.AddCommand(jar.NewCommand())
@@ -40,6 +40,9 @@ func execute(cmd *cobra.Command, args []string) {
 	if versionToggle {
 		fmt.Println("mcli version 0.0.1")
 	} else {
-		cmd.Usage()
+		if err := cmd.Usage(); err != nil {
+			// shouldn't happen
+			log.Fatal("failed to print help message")
+		}
 	}
 }

@@ -71,7 +71,6 @@ func JarHandler(version, build, path string) error {
 	dest := strings.Join(destElt[:len(destElt)-1], "/")
 	cmd := exec.Command(java, "-jar", path, "--installServer", dest)
 	loader.Start("Installing forge server")
-	// use cmd.Output ? if adding a debug flag and print output ?
 	if err = cmd.Run(); err != nil {
 		loader.Stop()
 		return errors.New("failed to install forge server")
