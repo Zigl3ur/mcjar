@@ -3,6 +3,7 @@ package forge
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os/exec"
 	"slices"
 	"strings"
@@ -10,6 +11,46 @@ import (
 	"github.com/Zigl3ur/mcli/internal/utils"
 	"github.com/Zigl3ur/mcli/internal/utils/loader"
 )
+
+func ListHandler(version string, versionChanged, snapshots bool) {
+	rawList, err := getVersionsList()
+	if err != nil {
+		log.Fatal(err)
+	}
+	loader.Stop()
+
+	vlist := make([]string, 0, len(rawList))
+
+	for k := range rawList {
+		vlist = append(vlist, k)
+	}
+
+	versionsMap := utils.SortMcVersions(vlist)
+	loader.Stop()
+
+	if versionChanged {
+		if slices.Contains(versionsMap["versions"], version) || slices.Contains(versionsMap["snapshots"], version) {
+			fmt.Printf("- %s\n", version)
+			for _, b := range rawList[version] {
+				fmt.Printf("  - %s\n", b)
+			}
+		} else {
+			log.Fatalf("forge doesnt support this version (given: %s)", version)
+		}
+	} else if snapshots {
+		if len(versionsMap["snapshots"]) > 0 {
+			for _, s := range versionsMap["snapshots"] {
+				fmt.Printf("- %s\n", s)
+			}
+		} else {
+			log.Fatal("forge doesn't support snapshots")
+		}
+	} else {
+		for _, v := range versionsMap["versions"] {
+			fmt.Printf("- %s\n", v)
+		}
+	}
+}
 
 func JarHandler(version, build, path string) error {
 	url, err := getUrl(version, build)
@@ -21,7 +62,7 @@ func JarHandler(version, build, path string) error {
 		return err
 	}
 
-	java, err := utils.GetJava()
+	java, err := utils.GetPath("java")
 	if err != nil {
 		return err
 	}
@@ -43,7 +84,7 @@ func JarHandler(version, build, path string) error {
 }
 
 func getUrl(version, build string) (string, error) {
-	vlist, err := GetVersionsList()
+	vlist, err := getVersionsList()
 	if err != nil {
 		return "", err
 	}
@@ -66,7 +107,7 @@ func getUrl(version, build string) (string, error) {
 	return url, nil
 }
 
-func GetVersionsList() (map[string][]string, error) {
+func getVersionsList() (map[string][]string, error) {
 	type ForgeVersions struct {
 		Versioning struct {
 			Latest   string   `xml:"latest"`
@@ -89,6 +130,10 @@ func GetVersionsList() (map[string][]string, error) {
 			build := parts[1]
 			versionMap[version] = append(versionMap[version], build)
 		}
+	}
+
+	for v := range versionMap {
+		slices.Reverse(versionMap[v])
 	}
 
 	return versionMap, nil

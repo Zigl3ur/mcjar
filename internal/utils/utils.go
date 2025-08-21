@@ -178,15 +178,15 @@ func mcVersionParser(version string) ([3]int, string) {
 	return [3]int{mainVersion, subVersion, patch}, ""
 }
 
-func GetJava() (string, error) {
-	java, err := exec.LookPath("java")
+func GetPath(file string) (string, error) {
+	path, err := exec.LookPath(file)
 	if err != nil {
 		if errors.Is(err, exec.ErrNotFound) {
-			return "", errors.New("java not found in PATH, please install it and retry.")
+			return "", fmt.Errorf("%s not found in PATH, please install it and retry.", file)
 		} else {
 			return "", err
 		}
 	}
 
-	return java, nil
+	return path, nil
 }

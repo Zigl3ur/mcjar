@@ -62,7 +62,7 @@ func JarHandler(version, build, path string) error {
 		return err
 	}
 
-	java, err := utils.GetJava()
+	java, err := utils.GetPath("java")
 	if err != nil {
 		return err
 	}
@@ -72,6 +72,7 @@ func JarHandler(version, build, path string) error {
 	cmd := exec.Command(java, "-jar", path, "--install-server", dest)
 	loader.Start("Installing neoforge server")
 	// use cmd.Output ? if adding a debug flag and print output ?
+	// cmd.Stdout = os.Stdout
 	if err = cmd.Run(); err != nil {
 		loader.Stop()
 		return errors.New("failed to install neoforge server")

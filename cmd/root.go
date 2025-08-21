@@ -29,6 +29,8 @@ func Execute() {
 func init() {
 	rootCmd.Flags().BoolP("debug", "b", false, "show debug logs")
 	rootCmd.Flags().BoolP("version", "v", false, "display mcli version")
+
+	rootCmd.Flags().SortFlags = false
 	rootCmd.AddCommand(jar.NewCommand())
 }
 

@@ -45,12 +45,12 @@ func TestSortMcVersions(t *testing.T) {
 		{[]string{"1.9", "1.10.2", "1.4.3"}, map[string][]string{"versions": {"1.10.2", "1.9", "1.4.3"}, "snapshots": {}}, false},
 		{[]string{"1.21.6", "23w6a", "1.21.6"}, map[string][]string{"versions": {"1.21.6", "1.21.6"}, "snapshots": {"23w6a"}}, false},
 		{[]string{"21E", " "}, map[string][]string{"versions": {}, "snapshots": {"21E", " "}}, false},
-		{[]string{""}, map[string][]string{"version": {}, "snapshots": {}}, false},
+		{[]string{""}, map[string][]string{"versions": {""}, "snapshots": {}}, false},
 	}
 
 	for _, tt := range tests {
 		result := SortMcVersions(tt.given)
-		if !slices.Equal(result["version"], tt.expected["version"]) || !slices.Equal(result["snapshots"], tt.expected["snapshots"]) {
+		if !slices.Equal(result["versions"], tt.expected["versions"]) || !slices.Equal(result["snapshots"], tt.expected["snapshots"]) {
 			t.Errorf("got %s expected %s", result, tt.expected)
 		}
 	}
