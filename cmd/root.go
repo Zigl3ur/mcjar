@@ -1,22 +1,21 @@
-/*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
-	"fmt"
-	"log"
 	"os"
 
+	"github.com/Zigl3ur/mcli/internal/cli/commands/datapack"
 	"github.com/Zigl3ur/mcli/internal/cli/commands/jar"
+	"github.com/Zigl3ur/mcli/internal/cli/commands/mod"
+	"github.com/Zigl3ur/mcli/internal/cli/commands/modpack"
+	"github.com/Zigl3ur/mcli/internal/cli/commands/plugin"
 	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "mcli",
-	Short: "Simple cli tool to easily manage minecraft server",
-	Long:  "A simple cli tool to make minecraft server management simple by providing jar download, world saving, and rcon",
-	Run:   execute,
+	Use:     "mcli",
+	Short:   "Simple cli tool to easily manage minecraft server",
+	Long:    "A simple cli tool to make minecraft server management simple by providing jar download, backup and many other tools",
+	Version: "0.0.1",
 }
 
 func Execute() {
@@ -28,21 +27,12 @@ func Execute() {
 
 func init() {
 	rootCmd.Flags().BoolP("verbose", "v", false, "show debug logs")
-	rootCmd.Flags().Bool("version", false, "display mcli version")
 
 	rootCmd.Flags().SortFlags = false
 	rootCmd.AddCommand(jar.NewCommand())
-}
+	rootCmd.AddCommand(plugin.NewCommand())
+	rootCmd.AddCommand(mod.NewCommand())
+	rootCmd.AddCommand(modpack.NewCommand())
+	rootCmd.AddCommand(datapack.NewCommand())
 
-func execute(cmd *cobra.Command, args []string) {
-	versionToggle, _ := cmd.Flags().GetBool("version")
-
-	if versionToggle {
-		fmt.Println("mcli version 0.0.1")
-	} else {
-		if err := cmd.Usage(); err != nil {
-			// shouldn't happen
-			log.Fatal("failed to print help message")
-		}
-	}
 }

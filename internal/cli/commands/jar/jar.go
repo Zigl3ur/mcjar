@@ -18,10 +18,8 @@ import (
 func NewCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "jar",
-		Short: "Download the server jar file based on specified args",
-		Long: `Download a server jar file based on given arguments, for example:
-		mcli -v 1.8.9 -t paper -o ~/Downloads/paper_1.8.9.jar`,
-		Run: execute,
+		Short: "Download a server jar file based on specified args",
+		Run:   execute,
 	}
 
 	cmd.Flags().StringP("type", "t", "", "the server type")

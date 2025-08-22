@@ -55,18 +55,18 @@ func WriteToFs(url, path string) error {
 	//nolint:errcheck
 	defer resp.Body.Close()
 
-	out, err := os.Create(path)
+	file, err := os.Create(path)
 	if err != nil {
 		return errors.New("failed to create file")
 	}
 
 	//nolint:errcheck
-	defer out.Close()
+	defer file.Close()
 
 	loader.Start("Download starting")
 
 	counter := &WriteCounter{StartTime: time.Now(), ContentLength: resp.ContentLength}
-	if _, err = io.Copy(out, io.TeeReader(resp.Body, counter)); err != nil {
+	if _, err = io.Copy(file, io.TeeReader(resp.Body, counter)); err != nil {
 		return errors.New("failed to create file")
 	}
 
@@ -193,4 +193,27 @@ func GetPath(file string) (string, error) {
 	}
 
 	return path, nil
+}
+
+// facets builder create facets string with given data,
+// facets is a query param for modrinth api
+func FacetsBuilder(versions []string, loader, projectType string) string {
+	elt := make([]string, 0, 3)
+	elt = append(elt, fmt.Sprintf("[\"project_type:%s\"]", projectType))
+
+	if len(versions) > 0 {
+		velt := make([]string, 0, len(versions))
+
+		for _, v := range versions {
+			velt = append(velt, fmt.Sprintf("\"versions:%s\"", v))
+		}
+
+		elt = append(elt, fmt.Sprintf("[%s]", strings.Join(velt, ",")))
+	}
+
+	if loader != "" {
+		elt = append(elt, fmt.Sprintf("[\"categories:%s\"]", loader))
+	}
+
+	return fmt.Sprintf("[%s]", strings.Join(elt, ","))
 }
