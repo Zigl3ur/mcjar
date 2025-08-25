@@ -32,16 +32,20 @@ type SlugData struct {
 }
 
 func Search(query, index, facets string, limit int) (SearchResult, error) {
-
 	var results SearchResult
 
 	query = url.QueryEscape(query)
 	index = url.QueryEscape(index)
-	facets = url.QueryEscape(facets)
 
-	url := fmt.Sprintf("https://api.modrinth.com/v2/search?query=%s&limit=%d&index=%s&facets=%s", query, limit, index, facets)
+	var searchUrl string
+	if facets != "" {
+		facets = url.QueryEscape(facets)
+		searchUrl = fmt.Sprintf("https://api.modrinth.com/v2/search?query=%s&limit=%d&index=%s&facets=%s", query, limit, index, facets)
+	} else {
+		searchUrl = fmt.Sprintf("https://api.modrinth.com/v2/search?query=%s&limit=%d&index=%s", query, limit, index)
+	}
 
-	if err := utils.GetReqJson(url, &results); err != nil {
+	if err := utils.GetReqJson(searchUrl, &results); err != nil {
 		return results, errors.New("failed to query modrinth api")
 	}
 

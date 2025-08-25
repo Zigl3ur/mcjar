@@ -9,6 +9,13 @@ const (
 	Modpack  AddOns = "modpack"
 )
 
+var ValidAddons = []string{
+	Plugin.String(),
+	DataPack.String(),
+	Mod.String(),
+	Modpack.String(),
+}
+
 func (s AddOns) String() string {
 	return string(s)
 }

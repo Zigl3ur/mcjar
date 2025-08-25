@@ -2,8 +2,10 @@ package search
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
+	"github.com/Zigl3ur/mcli/internal/cli/flags"
 	"github.com/Zigl3ur/mcli/internal/handlers/modrinth"
 	"github.com/Zigl3ur/mcli/internal/utils"
 	"github.com/Zigl3ur/mcli/internal/utils/loader"
@@ -41,7 +43,9 @@ func execute(cmd *cobra.Command, args []string) error {
 	versions, _ := cmd.Flags().GetStringArray("versions")
 	mcLoader, _ := cmd.Flags().GetString("loader")
 
-	// check addonstype
+	if cmd.Flags().Changed("type") && !slices.Contains(flags.ValidAddons, addonsType) {
+		return fmt.Errorf("Invalid addons type provided (given: %s) valide ones are %s", addonsType, flags.ValidAddons)
+	}
 
 	loader.Start(fmt.Sprintf("Searching for \"%s\"", query))
 
@@ -59,6 +63,9 @@ func execute(cmd *cobra.Command, args []string) error {
 
 	if len(versions) > 0 {
 		filters = append(filters, fmt.Sprintf("versions: %v", versions))
+	}
+	if addonsType != "" {
+		filters = append(filters, fmt.Sprintf("type: %v", addonsType))
 	}
 	if mcLoader != "" {
 		filters = append(filters, fmt.Sprintf("loader: %s", mcLoader))
