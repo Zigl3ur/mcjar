@@ -24,7 +24,7 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().BoolP("verbose", "v", false, "show debug logs")
+	rootCmd.PersistentFlags().Bool("verbose", false, "show debug logs")
 
 	rootCmd.Flags().SortFlags = false
 	rootCmd.AddCommand(jar.NewCommand(), addons.NewCommand())

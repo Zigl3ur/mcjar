@@ -44,7 +44,7 @@ func execute(cmd *cobra.Command, args []string) error {
 	mcLoader, _ := cmd.Flags().GetString("loader")
 
 	if cmd.Flags().Changed("type") && !slices.Contains(flags.ValidAddons, addonsType) {
-		return fmt.Errorf("Invalid addons type provided (given: %s) valide ones are %s", addonsType, flags.ValidAddons)
+		return fmt.Errorf("invalid addons type provided (given: %s) valid ones are %s", addonsType, flags.ValidAddons)
 	}
 
 	loader.Start(fmt.Sprintf("Searching for \"%s\"", query))

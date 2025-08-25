@@ -3,6 +3,7 @@ package forge
 import (
 	"errors"
 	"fmt"
+	"os"
 	"os/exec"
 	"slices"
 	"strings"
@@ -53,7 +54,7 @@ func ListHandler(version string, versionChanged, snapshots bool) error {
 	return nil
 }
 
-func JarHandler(version, build, path string) error {
+func JarHandler(version, build, path string, isVerbose bool) error {
 	url, err := getUrl(version, build)
 	if err != nil {
 		return err
@@ -71,7 +72,13 @@ func JarHandler(version, build, path string) error {
 	destElt := strings.Split(path, "/")
 	dest := strings.Join(destElt[:len(destElt)-1], "/")
 	cmd := exec.Command(java, "-jar", path, "--installServer", dest)
-	loader.Start("Installing forge server")
+
+	if isVerbose {
+		cmd.Stdout = os.Stdout
+	} else {
+		loader.Start("Installing forge server")
+	}
+
 	if err = cmd.Run(); err != nil {
 		loader.Stop()
 		return errors.New("failed to install forge server")

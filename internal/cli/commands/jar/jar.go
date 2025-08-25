@@ -39,6 +39,7 @@ func execute(cmd *cobra.Command, args []string) error {
 	version := cmd.Flag("version").Value.String()
 	build := cmd.Flag("build").Value.String()
 	output := cmd.Flag("output").Value.String()
+	isVerbose, _ := cmd.Flags().GetBool("verbose")
 
 	if serverType != "" {
 		fmt.Println("Using Values:")
@@ -64,9 +65,9 @@ func execute(cmd *cobra.Command, args []string) error {
 	case flags.Fabric.String():
 		return fabric.JarHandler(version, output)
 	case flags.Neoforge.String():
-		return neoforge.JarHandler(version, build, output)
+		return neoforge.JarHandler(version, build, output, isVerbose)
 	case flags.Forge.String():
-		return forge.JarHandler(version, build, output)
+		return forge.JarHandler(version, build, output, isVerbose)
 	default:
 		//nolint:errcheck
 		cmd.Usage()
