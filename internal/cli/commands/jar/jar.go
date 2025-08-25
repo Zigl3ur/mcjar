@@ -2,7 +2,6 @@ package jar
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/Zigl3ur/mcli/internal/cli/commands/jar/list"
 	"github.com/Zigl3ur/mcli/internal/cli/flags"
@@ -18,8 +17,9 @@ import (
 func NewCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "jar",
-		Short: "Download a server jar file based on specified args",
-		Run:   execute,
+		Short: "Download a server jar file based on given args",
+		Long:  "Download a server jar file based on given args",
+		RunE:  execute,
 	}
 
 	cmd.Flags().StringP("type", "t", "", "the server type")
@@ -33,7 +33,7 @@ func NewCommand() *cobra.Command {
 	return cmd
 }
 
-func execute(cmd *cobra.Command, args []string) {
+func execute(cmd *cobra.Command, args []string) error {
 
 	serverType := cmd.Flag("type").Value.String()
 	version := cmd.Flag("version").Value.String()
@@ -52,39 +52,24 @@ func execute(cmd *cobra.Command, args []string) {
 
 	switch serverType {
 	case flags.Vanilla.String():
-		if err := vanilla.JarHandler(version, output); err != nil {
-			log.Fatal(err)
-		}
+		return vanilla.JarHandler(version, output)
 	case flags.Paper.String():
-		if err := paper.JarHandler(flags.Paper.String(), version, build, output); err != nil {
-			log.Fatal(err)
-		}
+		return paper.JarHandler(flags.Paper.String(), version, build, output)
 	case flags.Folia.String():
-		if err := paper.JarHandler(flags.Folia.String(), version, build, output); err != nil {
-			log.Fatal(err)
-		}
+		return paper.JarHandler(flags.Folia.String(), version, build, output)
 	case flags.Velocity.String():
-		if err := paper.JarHandler(flags.Velocity.String(), version, build, output); err != nil {
-			log.Fatal(err)
-		}
+		return paper.JarHandler(flags.Velocity.String(), version, build, output)
 	case flags.Purpur.String():
-		if err := purpur.JarHandler(version, build, output); err != nil {
-			log.Fatal(err)
-		}
+		return purpur.JarHandler(version, build, output)
 	case flags.Fabric.String():
-		if err := fabric.JarHandler(version, output); err != nil {
-			log.Fatal(err)
-		}
+		return fabric.JarHandler(version, output)
 	case flags.Neoforge.String():
-		if err := neoforge.JarHandler(version, build, output); err != nil {
-			log.Fatal(err)
-		}
+		return neoforge.JarHandler(version, build, output)
 	case flags.Forge.String():
-		if err := forge.JarHandler(version, build, output); err != nil {
-			log.Fatal(err)
-		}
+		return forge.JarHandler(version, build, output)
 	default:
 		//nolint:errcheck
 		cmd.Usage()
+		return nil
 	}
 }

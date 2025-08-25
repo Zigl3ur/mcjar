@@ -217,3 +217,14 @@ func FacetsBuilder(versions []string, loader, projectType string) string {
 
 	return fmt.Sprintf("[%s]", strings.Join(elt, ","))
 }
+
+func Iso8601Format(date string) (string, error) {
+	layout := "2006-01-02T15:04:05Z"
+	t, err := time.Parse(layout, date)
+
+	if err != nil {
+		return "", err
+	}
+
+	return t.Format("Jan 2, 2006, 03:04 PM"), nil
+}

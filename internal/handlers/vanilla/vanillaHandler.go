@@ -3,16 +3,15 @@ package vanilla
 import (
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/Zigl3ur/mcli/internal/utils"
 	"github.com/Zigl3ur/mcli/internal/utils/loader"
 )
 
-func ListHandler(snapshots bool) {
+func ListHandler(snapshots bool) error {
 	rawList, err := getVersionsList()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	vlist := make([]string, 0, len(rawList.Versions))
@@ -34,6 +33,8 @@ func ListHandler(snapshots bool) {
 			fmt.Printf("- %s\n", v)
 		}
 	}
+
+	return nil
 }
 
 func JarHandler(version, path string) error {

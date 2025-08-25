@@ -3,17 +3,16 @@ package paper
 import (
 	"errors"
 	"fmt"
-	"log"
 	"slices"
 
 	"github.com/Zigl3ur/mcli/internal/utils"
 	"github.com/Zigl3ur/mcli/internal/utils/loader"
 )
 
-func ListHandler(project, version string, versionChanged, snapshots bool) {
+func ListHandler(project, version string, versionChanged, snapshots bool) error {
 	rawList, err := getVersionsList(project)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	vlist := make([]string, 0, len(rawList.Versions))
@@ -29,14 +28,14 @@ func ListHandler(project, version string, versionChanged, snapshots bool) {
 		if slices.Contains(versionsMap["versions"], version) || slices.Contains(versionsMap["snapshots"], version) {
 			blist, err := getBuildList(project, version)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 			fmt.Printf("- %s\n", version)
 			for _, b := range blist {
 				fmt.Printf("  - %d\n", b.Id)
 			}
 		} else {
-			log.Fatalf("paper doesnt support this version (given: %s)", version)
+			return fmt.Errorf("paper doesnt support this version (given: %s)", version)
 		}
 	} else if snapshots {
 		if len(versionsMap["snapshots"]) > 0 {
@@ -44,13 +43,15 @@ func ListHandler(project, version string, versionChanged, snapshots bool) {
 				fmt.Printf("- %s\n", s)
 			}
 		} else {
-			log.Fatalf("%s doesn't support snapshots", project)
+			return fmt.Errorf("%s doesn't support snapshots", project)
 		}
 	} else {
 		for _, v := range versionsMap["versions"] {
 			fmt.Printf("- %s\n", v)
 		}
 	}
+
+	return nil
 }
 
 func JarHandler(project, version, build, path string) error {

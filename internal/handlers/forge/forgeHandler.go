@@ -3,7 +3,6 @@ package forge
 import (
 	"errors"
 	"fmt"
-	"log"
 	"os/exec"
 	"slices"
 	"strings"
@@ -12,10 +11,10 @@ import (
 	"github.com/Zigl3ur/mcli/internal/utils/loader"
 )
 
-func ListHandler(version string, versionChanged, snapshots bool) {
+func ListHandler(version string, versionChanged, snapshots bool) error {
 	rawList, err := getVersionsList()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	loader.Stop()
 
@@ -35,7 +34,7 @@ func ListHandler(version string, versionChanged, snapshots bool) {
 				fmt.Printf("  - %s\n", b)
 			}
 		} else {
-			log.Fatalf("forge doesnt support this version (given: %s)", version)
+			return fmt.Errorf("forge doesnt support this version (given: %s)", version)
 		}
 	} else if snapshots {
 		if len(versionsMap["snapshots"]) > 0 {
@@ -43,13 +42,15 @@ func ListHandler(version string, versionChanged, snapshots bool) {
 				fmt.Printf("- %s\n", s)
 			}
 		} else {
-			log.Fatal("forge doesn't support snapshots")
+			return fmt.Errorf("forge doesn't support snapshots")
 		}
 	} else {
 		for _, v := range versionsMap["versions"] {
 			fmt.Printf("- %s\n", v)
 		}
 	}
+
+	return nil
 }
 
 func JarHandler(version, build, path string) error {

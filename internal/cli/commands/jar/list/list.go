@@ -18,7 +18,8 @@ func NewCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List version and builds for specified server type",
-		Run:   execute,
+		Long:  "List available versions and builds for specified server type",
+		RunE:  execute,
 	}
 
 	cmd.Flags().StringP("type", "t", "", "The server type to get version / builds list")
@@ -30,7 +31,7 @@ func NewCommand() *cobra.Command {
 	return cmd
 }
 
-func execute(cmd *cobra.Command, args []string) {
+func execute(cmd *cobra.Command, args []string) error {
 	serverType := cmd.Flag("type").Value.String()
 	version := cmd.Flag("version").Value.String()
 	snapshots, _ := cmd.Flags().GetBool("snapshots")
@@ -40,25 +41,25 @@ func execute(cmd *cobra.Command, args []string) {
 
 	switch serverType {
 	case flags.Vanilla.String():
-		vanilla.ListHandler(snapshots)
+		return vanilla.ListHandler(snapshots)
 	case flags.Paper.String():
-		paper.ListHandler(flags.Paper.String(), version, versionChanged, snapshots)
+		return paper.ListHandler(flags.Paper.String(), version, versionChanged, snapshots)
 	case flags.Folia.String():
-		paper.ListHandler(flags.Folia.String(), version, versionChanged, snapshots)
+		return paper.ListHandler(flags.Folia.String(), version, versionChanged, snapshots)
 	case flags.Velocity.String():
-		paper.ListHandler(flags.Velocity.String(), version, versionChanged, snapshots)
+		return paper.ListHandler(flags.Velocity.String(), version, versionChanged, snapshots)
 	case flags.Purpur.String():
-		purpur.ListHandler(version, versionChanged, snapshots)
+		return purpur.ListHandler(version, versionChanged, snapshots)
 	case flags.Fabric.String():
-		fabric.ListHandler(version, snapshots)
+		return fabric.ListHandler(version, snapshots)
 	case flags.Neoforge.String():
-		neoforge.ListHandler(version, versionChanged, snapshots)
+		return neoforge.ListHandler(version, versionChanged, snapshots)
 	case flags.Forge.String():
-		forge.ListHandler(version, versionChanged, snapshots)
+		return forge.ListHandler(version, versionChanged, snapshots)
 	default:
 		loader.Stop()
-
 		//nolint:errcheck
 		cmd.Usage()
+		return nil
 	}
 }
