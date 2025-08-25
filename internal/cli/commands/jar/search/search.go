@@ -31,6 +31,7 @@ func NewCommand(parentName string) *cobra.Command {
 
 func execute(cmd *cobra.Command, args []string, parentName string) {
 	if len(args) < 1 {
+		//nolint:errcheck
 		cmd.Usage()
 		return
 	}
@@ -38,7 +39,7 @@ func execute(cmd *cobra.Command, args []string, parentName string) {
 	query := args[0]
 
 	limit, _ := cmd.Flags().GetInt("limit")
-	index := cmd.Flag("index").Value.String()
+	index, _ := cmd.Flags().GetString("index")
 	versions, _ := cmd.Flags().GetStringArray("versions")
 	mcLoader, _ := cmd.Flags().GetString("loader")
 

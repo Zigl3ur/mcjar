@@ -10,8 +10,9 @@ import (
 func NewCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "datapacks",
-		Short: "Search and download datapacks",
+		Short: "Search and download datapacks from modrinth",
 		Run: func(cmd *cobra.Command, args []string) {
+			//nolint:errcheck
 			cmd.Usage()
 		},
 	}
