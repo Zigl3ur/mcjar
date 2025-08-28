@@ -41,6 +41,14 @@ func execute(cmd *cobra.Command, args []string) error {
 	output := cmd.Flag("output").Value.String()
 	isVerbose, _ := cmd.Flags().GetBool("verbose")
 
+	if !cmd.Flag("output").Changed {
+		if serverType != flags.Vanilla.String() {
+			output = fmt.Sprintf("%s-%s-%s.jar", serverType, version, build)
+		} else {
+			output = fmt.Sprintf("%s-%s.jar", serverType, version)
+		}
+	}
+
 	if serverType != "" {
 		fmt.Println("Using Values:")
 		fmt.Printf("- type: %s\n", serverType)

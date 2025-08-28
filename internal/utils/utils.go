@@ -46,10 +46,10 @@ func (wc *WriteCounter) Write(p []byte) (int, error) {
 }
 
 func WriteToFs(url, path string) error {
-	resp, err := http.Get(url)
 
+	resp, err := http.Get(url)
 	if err != nil {
-		return errors.New("failed to download jar")
+		return err
 	}
 
 	//nolint:errcheck
@@ -57,7 +57,7 @@ func WriteToFs(url, path string) error {
 
 	file, err := os.Create(path)
 	if err != nil {
-		return errors.New("failed to create file")
+		return errors.New("failed to create output file")
 	}
 
 	//nolint:errcheck
@@ -67,7 +67,7 @@ func WriteToFs(url, path string) error {
 
 	counter := &WriteCounter{StartTime: time.Now(), ContentLength: resp.ContentLength}
 	if _, err = io.Copy(file, io.TeeReader(resp.Body, counter)); err != nil {
-		return errors.New("failed to create file")
+		return errors.New("failed to create output file")
 	}
 
 	loader.Stop()

@@ -13,6 +13,7 @@ func NewCommand() *cobra.Command {
 		Use:   "info [slug]",
 		Short: "Get Info about a plugin / mod / modpack and datapack from modrinth",
 		Long:  "Get detailed information about a specific plugin / mod / modpack and datapack from modrinth",
+		Args:  cobra.ExactArgs(1),
 		RunE:  execute,
 	}
 
@@ -20,12 +21,6 @@ func NewCommand() *cobra.Command {
 }
 
 func execute(cmd *cobra.Command, args []string) error {
-	if len(args) < 1 {
-		//nolint:errcheck
-		cmd.Usage()
-		return nil
-	}
-
 	slug := args[0]
 
 	result, err := modrinth.Info(slug)
