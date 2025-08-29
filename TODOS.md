@@ -11,7 +11,7 @@
 - [x] Function to sort an array of minecraft versions
 - [x] Display download speed
 - [ ] Add Tests
-- [x] change default output if not specified to smthng like `neoforge-1.21.8-234.jar` (serverType-version-build.jar)
+- [ ] change default output if not specified to smthng like `neoforge-1.21.8-234.jar` (serverType-version-build.jar)
 - [x] for mods/plugins/modpacks/datapacks search display filter used (if any)
 
 ## Jar
