@@ -119,7 +119,7 @@ func TestFacetsBuilder(t *testing.T) {
 	}
 }
 
-func TestISO8691Format(t *testing.T) {
+func TestISO8601Format(t *testing.T) {
 	tests := []testData[string, string]{
 		{"2024-12-19T17:51:48.102945Z", "Dec 19, 2024, 05:51 PM", false},
 		{"2023-01-01T00:00:00Z", "Jan 1, 2023, 12:00 AM", false},
