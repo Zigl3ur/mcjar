@@ -54,13 +54,13 @@ func ListHandler(version string, versionChanged, snapshots bool) error {
 	return nil
 }
 
-func JarHandler(version, build, path string, isVerbose bool) error {
+func JarHandler(version, build, dir, filename string, isVerbose bool) error {
 	url, err := getUrl(version, build)
 	if err != nil {
 		return err
 	}
 
-	if err = utils.WriteToFs(url, path); err != nil {
+	if err = utils.WriteToFs(url, dir, filename); err != nil {
 		return err
 	}
 
@@ -69,12 +69,13 @@ func JarHandler(version, build, path string, isVerbose bool) error {
 		return err
 	}
 
-	destElt := strings.Split(path, "/")
-	dest := strings.Join(destElt[:len(destElt)-1], "/")
-	cmd := exec.Command(java, "-jar", path, "--install-server", dest)
+	cmd := exec.Command(java, "-jar", dir+filename, "--install-server", dir)
+
+	fmt.Println(cmd)
 
 	if isVerbose {
 		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
 	} else {
 		loader.Start("Installing neoforge server")
 	}
@@ -85,7 +86,7 @@ func JarHandler(version, build, path string, isVerbose bool) error {
 	}
 
 	loader.Stop()
-	fmt.Printf("Installed neoforge server at %s\n", dest)
+	fmt.Printf("Installed neoforge server at %s\n", dir)
 
 	return nil
 }

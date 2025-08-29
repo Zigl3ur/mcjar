@@ -36,13 +36,13 @@ func ListHandler(version string, snapshots bool) error {
 	return nil
 }
 
-func JarHandler(version, path string) error {
+func JarHandler(version, dir, filename string) error {
 	url, err := getUrl(version)
 	if err != nil {
 		return err
 	}
 
-	return utils.WriteToFs(url, path)
+	return utils.WriteToFs(url, dir, filename)
 }
 
 func getUrl(version string) (string, error) {

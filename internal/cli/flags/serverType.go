@@ -11,8 +11,18 @@ const (
 	Fabric   ServerType = "fabric"
 	Neoforge ServerType = "neoforge"
 	Forge    ServerType = "forge"
-	Spigot   ServerType = "spigot"
 )
+
+var ValidServerType = []string{
+	Vanilla.String(),
+	Paper.String(),
+	Folia.String(),
+	Velocity.String(),
+	Purpur.String(),
+	Fabric.String(),
+	Neoforge.String(),
+	Forge.String(),
+}
 
 func (s ServerType) String() string {
 	return string(s)

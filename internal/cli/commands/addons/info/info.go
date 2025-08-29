@@ -51,7 +51,7 @@ func execute(cmd *cobra.Command, args []string) error {
 	%s
   - Game Versions:
 	%s
-`, result.Title, result.Description, result.Downloads, updatedAtFormated, createdAtFormated, result.Categories, result.ServerSide, result.ClientSide, result.Loaders, result.GameVersions[:])
+`, result.Title, result.Description, result.Downloads, updatedAtFormated, createdAtFormated, result.Categories, result.ServerSide, result.ClientSide, result.Loaders, result.GameVersions)
 
 	return nil
 }

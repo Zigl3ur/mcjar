@@ -31,6 +31,19 @@ type SlugData struct {
 	Loaders      []string `json:"loaders"`
 }
 
+type DownloadData struct {
+	GameVersions []string `json:"game_versions"`
+	Loaders      []string `json:"loaders"`
+	Name         string   `json:"name"`
+	Files        []struct {
+		Url string `json:"url"`
+	} `json:"files"`
+	Dependencies []struct {
+		ProjectId      string `json:"project_id"`
+		DependencyType string `json:"required"`
+	} `json:"dependencies"`
+}
+
 func Search(query, index, facets string, limit int) (SearchResult, error) {
 	var results SearchResult
 
@@ -62,4 +75,22 @@ func Info(slug string) (SlugData, error) {
 	}
 
 	return data, nil
+}
+
+func Download(slug, version, loader, path string) error {
+	var data []DownloadData
+
+	if err := utils.GetReqJson(fmt.Sprintf("https://api.modrinth.com/v2/project/%s/version", slug), &data); err != nil {
+		return errors.New("failed to query specified slug")
+	}
+
+	if loader == "" {
+		return errors.New("please specify a loader")
+	}
+
+	fmt.Println(data)
+
+	// recall to download deps
+
+	return nil
 }

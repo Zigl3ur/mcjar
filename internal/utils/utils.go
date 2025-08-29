@@ -45,7 +45,15 @@ func (wc *WriteCounter) Write(p []byte) (int, error) {
 	return n, nil
 }
 
-func WriteToFs(url, path string) error {
+func WriteToFs(url, dir, filename string) error {
+
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		if AskConfirm("Directory not found. Create it ?") {
+			if err = os.Mkdir(dir, 0755); err != nil {
+				return err
+			}
+		}
+	}
 
 	resp, err := http.Get(url)
 	if err != nil {
@@ -55,8 +63,9 @@ func WriteToFs(url, path string) error {
 	//nolint:errcheck
 	defer resp.Body.Close()
 
-	file, err := os.Create(path)
+	file, err := os.Create(dir + filename)
 	if err != nil {
+		fmt.Println(err.Error())
 		return errors.New("failed to create output file")
 	}
 
@@ -71,7 +80,7 @@ func WriteToFs(url, path string) error {
 	}
 
 	loader.Stop()
-	fmt.Printf("Saved to %s\n", path)
+	fmt.Printf("Saved to %s\n", dir)
 
 	return nil
 }
@@ -234,4 +243,19 @@ func Iso8601Format(date string) (string, error) {
 	}
 
 	return t.Format("Jan 2, 2006, 03:04 PM"), nil
+}
+
+func AskConfirm(message string) bool {
+	var answer string
+
+	fmt.Printf("%s [Y/n]: ", message)
+	//nolint:errcheck
+	fmt.Scanf("%s", &answer)
+
+	if strings.ToUpper(answer) == "Y" {
+		return true
+	}
+
+	fmt.Println("Aborted.")
+	return false
 }

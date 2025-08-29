@@ -2,6 +2,7 @@ package list
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/Zigl3ur/mcli/internal/cli/flags"
 	"github.com/Zigl3ur/mcli/internal/handlers/fabric"
@@ -16,10 +17,11 @@ import (
 
 func NewCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "list",
-		Short: "List version and builds for specified server type",
-		Long:  "List available versions and builds for specified server type",
-		RunE:  execute,
+		Use:     "list",
+		Short:   "List version and builds for specified server type",
+		Long:    "List available versions and builds for specified server type",
+		PreRunE: validate,
+		RunE:    execute,
 	}
 
 	cmd.Flags().StringP("type", "t", "", "The server type to get version / builds list")
@@ -31,9 +33,19 @@ func NewCommand() *cobra.Command {
 	return cmd
 }
 
+func validate(cmd *cobra.Command, args []string) error {
+	serverType, _ := cmd.Flags().GetString("type")
+
+	if cmd.Flag("type").Changed && !slices.Contains(flags.ValidServerType, serverType) {
+		return fmt.Errorf("invalid type, valid ones are %s", flags.ValidServerType)
+	}
+
+	return nil
+}
+
 func execute(cmd *cobra.Command, args []string) error {
-	serverType := cmd.Flag("type").Value.String()
-	version := cmd.Flag("version").Value.String()
+	serverType, _ := cmd.Flags().GetString("type")
+	version, _ := cmd.Flags().GetString("version")
 	snapshots, _ := cmd.Flags().GetBool("snapshots")
 	versionChanged := cmd.Flag("version").Changed
 
