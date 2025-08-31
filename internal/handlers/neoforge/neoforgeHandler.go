@@ -71,8 +71,6 @@ func JarHandler(version, build, dir, filename string, isVerbose bool) error {
 
 	cmd := exec.Command(java, "-jar", dir+filename, "--install-server", dir)
 
-	fmt.Println(cmd)
-
 	if isVerbose {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr

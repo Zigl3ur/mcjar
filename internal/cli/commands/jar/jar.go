@@ -25,10 +25,15 @@ func NewCommand() *cobra.Command {
 		RunE:    execute,
 	}
 
-	cmd.Flags().StringP("type", "t", "", "the server type")
+	cmd.Flags().StringP("type", "t", "", "the server type (required)")
 	cmd.Flags().StringP("version", "v", "1.21", "the server version")
 	cmd.Flags().StringP("build", "b", "latest", "the server version build")
 	cmd.Flags().StringP("destination", "d", ".", "the folder destination for the server jar file")
+
+	//nolint:errcheck
+	cmd.MarkFlagRequired("type")
+	//nolint:errcheck
+	cmd.MarkFlagDirname("destination")
 
 	cmd.Flags().SortFlags = false
 	cmd.AddCommand(list.NewCommand())
@@ -66,15 +71,13 @@ func execute(cmd *cobra.Command, args []string) error {
 		filename = fmt.Sprintf("%s-%s.jar", serverType, version)
 	}
 
-	if serverType != "" {
-		fmt.Println("Using Values:")
-		fmt.Printf("- type: %s\n", serverType)
-		fmt.Printf("- version: %s\n", version)
-		if serverType != flags.Vanilla.String() {
-			fmt.Printf("- build: %s\n", build)
-		}
-		fmt.Printf("- output: %s\n", dir+filename)
+	fmt.Println("Using Values:")
+	fmt.Printf("- type: %s\n", serverType)
+	fmt.Printf("- version: %s\n", version)
+	if serverType != flags.Vanilla.String() {
+		fmt.Printf("- build: %s\n", build)
 	}
+	fmt.Printf("- output: %s\n", dir+filename)
 
 	switch serverType {
 	case flags.Vanilla.String():

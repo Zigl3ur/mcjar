@@ -14,11 +14,12 @@ import (
 
 func NewCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "search [query]",
-		Short: "Search for plugins / mods / modpacks and datapacks from modrinth",
-		Long:  "Search for plugins / mods / modpacks and datapacks from modrinth",
-		Args:  cobra.ExactArgs(1),
-		RunE:  execute,
+		Use:     "search [query]",
+		Short:   "Search for plugins / mods / modpacks and datapacks from modrinth",
+		Long:    "Search for plugins / mods / modpacks and datapacks from modrinth",
+		Args:    cobra.ExactArgs(1),
+		PreRunE: validate,
+		RunE:    execute,
 	}
 
 	cmd.Flags().StringP("type", "t", "", "addons type to search for")
@@ -33,6 +34,21 @@ func NewCommand() *cobra.Command {
 	return cmd
 }
 
+func validate(cmd *cobra.Command, args []string) error {
+	mcLoader, _ := cmd.Flags().GetString("loader")
+	addonsType, _ := cmd.Flags().GetString("type")
+
+	if cmd.Flags().Changed("type") && !slices.Contains(flags.ValidAddons, addonsType) {
+		return fmt.Errorf("invalid addons type provided (given: %s) valid ones are %s", addonsType, flags.ValidAddons)
+	}
+
+	if cmd.Flags().Changed("loader") && !slices.Contains(flags.ValidLoaders, mcLoader) {
+		return fmt.Errorf("invalid loader provided (given: %s) valid ones are %s", mcLoader, flags.ValidLoaders)
+	}
+
+	return nil
+}
+
 func execute(cmd *cobra.Command, args []string) error {
 	query := args[0]
 
@@ -42,10 +58,6 @@ func execute(cmd *cobra.Command, args []string) error {
 	index, _ := cmd.Flags().GetString("index")
 	versions, _ := cmd.Flags().GetStringArray("versions")
 	mcLoader, _ := cmd.Flags().GetString("loader")
-
-	if cmd.Flags().Changed("type") && !slices.Contains(flags.ValidAddons, addonsType) {
-		return fmt.Errorf("invalid addons type provided (given: %s) valid ones are %s", addonsType, flags.ValidAddons)
-	}
 
 	loader.Start(fmt.Sprintf("Searching for \"%s\"", query))
 

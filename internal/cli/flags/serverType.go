@@ -11,6 +11,9 @@ const (
 	Fabric   ServerType = "fabric"
 	Neoforge ServerType = "neoforge"
 	Forge    ServerType = "forge"
+	Bukkit   ServerType = "bukkit"
+	Spigot   ServerType = "spigot"
+	Sponge   ServerType = "sponge"
 )
 
 var ValidServerType = []string{
@@ -22,6 +25,18 @@ var ValidServerType = []string{
 	Fabric.String(),
 	Neoforge.String(),
 	Forge.String(),
+}
+
+var ValidLoaders = []string{
+	Forge.String(),
+	Neoforge.String(),
+	Fabric.String(),
+	Bukkit.String(),
+	Folia.String(),
+	Paper.String(),
+	Purpur.String(),
+	Spigot.String(),
+	Sponge.String(),
 }
 
 func (s ServerType) String() string {

@@ -23,6 +23,7 @@ type WriteCounter struct {
 	Total         uint64
 	ContentLength int64
 	StartTime     time.Time
+	filename      string
 }
 
 func (wc *WriteCounter) Write(p []byte) (int, error) {
@@ -37,9 +38,9 @@ func (wc *WriteCounter) Write(p []byte) (int, error) {
 
 	if wc.ContentLength > 0 {
 		progress := int64(wc.Total*100) / wc.ContentLength
-		loader.UpdateMessage(fmt.Sprintf("Downloading: %02d%%, %s", progress, downloadSpeed))
+		loader.UpdateMessage(fmt.Sprintf("Downloading %s: %02d%%, %s", wc.filename, progress, downloadSpeed))
 	} else {
-		loader.UpdateMessage(fmt.Sprintf("Downloading: %d bytes, %s", wc.Total, downloadSpeed))
+		loader.UpdateMessage(fmt.Sprintf("Downloading %s: %d bytes, %s", wc.filename, wc.Total, downloadSpeed))
 	}
 
 	return n, nil
@@ -63,9 +64,10 @@ func WriteToFs(url, dir, filename string) error {
 	//nolint:errcheck
 	defer resp.Body.Close()
 
-	file, err := os.Create(dir + filename)
+	// dir will always end with "/" cause its checked in commands prerun func
+	filepath := dir + filename
+	file, err := os.Create(filepath)
 	if err != nil {
-		fmt.Println(err.Error())
 		return errors.New("failed to create output file")
 	}
 
@@ -74,13 +76,13 @@ func WriteToFs(url, dir, filename string) error {
 
 	loader.Start("Download starting")
 
-	counter := &WriteCounter{StartTime: time.Now(), ContentLength: resp.ContentLength}
+	counter := &WriteCounter{StartTime: time.Now(), ContentLength: resp.ContentLength, filename: filename}
 	if _, err = io.Copy(file, io.TeeReader(resp.Body, counter)); err != nil {
 		return errors.New("failed to create output file")
 	}
 
 	loader.Stop()
-	fmt.Printf("Saved to %s\n", dir)
+	fmt.Printf("Saved %s in %s\n", filename, dir)
 
 	return nil
 }
