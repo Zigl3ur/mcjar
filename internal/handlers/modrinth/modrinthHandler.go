@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"slices"
 	"strings"
 
@@ -96,11 +96,11 @@ func Info(slug string) (SlugData, error) {
 	return data, nil
 }
 
-func Download(slug, version, loader, dir string) error {
+func Download(slug, version, loader, dir string) (string, error) {
 	var data []DownloadData
 
 	if err := utils.GetReqJson(fmt.Sprintf("https://api.modrinth.com/v2/project/%s/version", slug), &data); err != nil {
-		return errors.New("failed to query specified slug")
+		return "", errors.New("failed to query specified slug")
 	}
 
 	idx := -1
@@ -112,33 +112,40 @@ func Download(slug, version, loader, dir string) error {
 	}
 
 	if idx == -1 {
-		return fmt.Errorf("no suitable mod version found (loader: %s, game-version: %s)", loader, version)
+		return "", fmt.Errorf("no suitable mod version found (loader: %s, game-version: %s)", loader, version)
 	}
 
+	var filePath string
 	for _, f := range data[idx].Files {
-		if err := utils.WriteToFs(f.Url, path.Join(dir, f.Filename)); err != nil {
-			return fmt.Errorf("failed to download %s", f.Filename)
+		formattedFilename := strings.ReplaceAll(f.Filename, " ", "_")
+		fullPath := filepath.Join(dir, formattedFilename)
+
+		// return filepath for mrpack cause need to extract it
+		if filepath.Ext(f.Filename) == ".mrpack" {
+			filePath = fullPath
+		}
+		if err := utils.WriteToFs(f.Url, fullPath); err != nil {
+			return "", fmt.Errorf("failed to download %s", formattedFilename)
 		}
 	}
 
 	if len(data[idx].Dependencies) > 0 {
 		for _, d := range data[idx].Dependencies {
 			if d.DependencyType == "required" {
-				if err := Download(d.ProjectId, version, loader, dir); err != nil {
+				if _, err := Download(d.ProjectId, version, loader, dir); err != nil {
 					fmt.Printf("failed to download dependency (%s)\n", d.ProjectId)
 				}
 			}
 		}
 	}
 
-	return nil
+	return filePath, nil
 }
 
 func MrPackHandler(packPath, modsDir string, isVerbose bool) error {
 
 	unzip, err := utils.GetPath("unzip")
 	if err != nil {
-		// if no unzip try with tar ?
 		return err
 	}
 
@@ -159,12 +166,14 @@ func MrPackHandler(packPath, modsDir string, isVerbose bool) error {
 		return errors.New("failed to extract modpack")
 	}
 
+	_, fileMrpack := filepath.Split(packPath)
+	//nolint:errcheck
+	defer os.Remove(filepath.Join(modsDir, fileMrpack))
 	//nolint:errcheck
 	defer os.RemoveAll(output)
 
 	modsIndexPath := fmt.Sprintf("%s/modrinth.index.json", output)
 
-	fmt.Println(modsIndexPath)
 	modsIndex, err := os.Open(modsIndexPath)
 	if err != nil {
 		return errors.New("failed to open modpack index file")
@@ -181,7 +190,7 @@ func MrPackHandler(packPath, modsDir string, isVerbose bool) error {
 			parsedUrl := strings.Split(urlDownload, "/")
 			filename := parsedUrl[len(parsedUrl)-1]
 			if d.Env.Server == "required" {
-				if err := utils.WriteToFs(urlDownload, path.Join(modsDir, filename)); err != nil {
+				if err := utils.WriteToFs(urlDownload, filepath.Join(modsDir, filename)); err != nil {
 					fmt.Printf("Failed to get %s", filename)
 				}
 			}

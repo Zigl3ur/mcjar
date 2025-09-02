@@ -3,7 +3,6 @@ package get
 import (
 	"fmt"
 	"slices"
-	"strings"
 
 	"github.com/Zigl3ur/mcli/internal/cli/flags"
 	"github.com/Zigl3ur/mcli/internal/handlers/modrinth"
@@ -22,7 +21,7 @@ func NewCommand() *cobra.Command {
 
 	cmd.Flags().StringP("version", "v", "", "the game version (required)")
 	cmd.Flags().StringP("loader", "l", "", "the loader to be compatible with (required)")
-	cmd.Flags().StringP("destination", "d", "./", "the folder where to put the downloaded jar")
+	cmd.Flags().StringP("destination", "d", "", "the folder where to put the downloaded jar")
 
 	cmd.MarkFlagsRequiredTogether("loader", "version")
 	//nolint:errcheck
@@ -33,15 +32,9 @@ func NewCommand() *cobra.Command {
 
 func validate(cmd *cobra.Command, args []string) error {
 	mcLoader, _ := cmd.Flags().GetString("loader")
-	dir, _ := cmd.Flags().GetString("destination")
 
 	if cmd.Flag("loader").Changed && !slices.Contains(flags.ValidLoaders, mcLoader) {
 		return fmt.Errorf("invalid loader provided (given: %s) valid ones are %s", mcLoader, flags.ValidLoaders)
-	}
-
-	if !strings.HasSuffix(dir, "/") {
-		//nolint:errcheck
-		cmd.Flag("destination").Value.Set(dir + "/")
 	}
 
 	return nil
@@ -51,10 +44,21 @@ func execute(cmd *cobra.Command, args []string) error {
 	slug := args[0]
 
 	version, _ := cmd.Flags().GetString("version")
-	loader, _ := cmd.Flags().GetString("loader")
+	mcLoader, _ := cmd.Flags().GetString("loader")
 	dir, _ := cmd.Flags().GetString("destination")
+	isVerbose, _ := cmd.Flags().GetBool("verbose")
 
-	if err := modrinth.Download(slug, version, loader, dir); err != nil {
+	filePath, err := modrinth.Download(slug, version, mcLoader, dir)
+	if err != nil {
+		return err
+	}
+
+	// not a mod pack no need to extract
+	if filePath == "" {
+		return nil
+	}
+
+	if err = modrinth.MrPackHandler(filePath, dir, isVerbose); err != nil {
 		return err
 	}
 

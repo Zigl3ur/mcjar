@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"slices"
 	"strings"
 
@@ -70,7 +70,7 @@ func JarHandler(version, build, outPath string, isVerbose bool) error {
 		return err
 	}
 
-	dir, _ := path.Split(outPath)
+	dir, _ := filepath.Split(outPath)
 	cmd := exec.Command(java, "-jar", outPath, "--install-server", dir)
 
 	if isVerbose {

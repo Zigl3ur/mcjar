@@ -53,7 +53,7 @@ func WriteToFs(url, outPath string) error {
 
 	// spliting outpath with ./ or . return an empty dir
 	if dir == "" {
-		dir = "."
+		dir = "./"
 	}
 
 	stat, err := os.Stat(dir)

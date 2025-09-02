@@ -5,6 +5,7 @@ import (
 
 	"github.com/Zigl3ur/mcli/internal/handlers/modrinth"
 	"github.com/Zigl3ur/mcli/internal/utils"
+	"github.com/Zigl3ur/mcli/internal/utils/loader"
 	"github.com/spf13/cobra"
 )
 
@@ -23,6 +24,8 @@ func NewCommand() *cobra.Command {
 func execute(cmd *cobra.Command, args []string) error {
 	slug := args[0]
 
+	loader.Start(fmt.Sprintf("Getting info for \"%s\"", slug))
+
 	result, err := modrinth.Info(slug)
 	if err != nil {
 		return err
@@ -36,6 +39,8 @@ func execute(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		createdAtFormated = result.CreatedAt
 	}
+
+	loader.Stop()
 
 	fmt.Printf(`- %s
   %s

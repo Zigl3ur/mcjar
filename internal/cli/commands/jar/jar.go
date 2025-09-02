@@ -2,7 +2,7 @@ package jar
 
 import (
 	"fmt"
-	"path"
+	"path/filepath"
 	"slices"
 
 	"github.com/Zigl3ur/mcli/internal/cli/commands/jar/list"
@@ -28,7 +28,7 @@ func NewCommand() *cobra.Command {
 	cmd.Flags().StringP("type", "t", "", "the server type (required)")
 	cmd.Flags().StringP("version", "v", "1.21", "the server version")
 	cmd.Flags().StringP("build", "b", "latest", "the server version build")
-	cmd.Flags().StringP("destination", "d", "./", "the folder destination for the server jar file")
+	cmd.Flags().StringP("destination", "d", "", "the folder destination for the server jar file")
 
 	//nolint:errcheck
 	cmd.MarkFlagRequired("type")
@@ -65,7 +65,7 @@ func execute(cmd *cobra.Command, args []string) error {
 		filename = fmt.Sprintf("%s-%s.jar", serverType, version)
 	}
 
-	outPath := path.Join(dir, filename)
+	outPath := filepath.Join(dir, filename)
 
 	fmt.Println("Using Values:")
 	fmt.Printf("- type: %s\n", serverType)
