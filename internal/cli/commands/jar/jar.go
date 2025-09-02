@@ -2,8 +2,8 @@ package jar
 
 import (
 	"fmt"
+	"path"
 	"slices"
-	"strings"
 
 	"github.com/Zigl3ur/mcli/internal/cli/commands/jar/list"
 	"github.com/Zigl3ur/mcli/internal/cli/flags"
@@ -28,7 +28,7 @@ func NewCommand() *cobra.Command {
 	cmd.Flags().StringP("type", "t", "", "the server type (required)")
 	cmd.Flags().StringP("version", "v", "1.21", "the server version")
 	cmd.Flags().StringP("build", "b", "latest", "the server version build")
-	cmd.Flags().StringP("destination", "d", ".", "the folder destination for the server jar file")
+	cmd.Flags().StringP("destination", "d", "./", "the folder destination for the server jar file")
 
 	//nolint:errcheck
 	cmd.MarkFlagRequired("type")
@@ -43,15 +43,9 @@ func NewCommand() *cobra.Command {
 
 func validate(cmd *cobra.Command, args []string) error {
 	serverType, _ := cmd.Flags().GetString("type")
-	dir, _ := cmd.Flags().GetString("destination")
 
 	if cmd.Flag("type").Changed && !slices.Contains(flags.ValidServerType, serverType) {
 		return fmt.Errorf("invalid type, valid ones are %s", flags.ValidServerType)
-	}
-
-	if !strings.HasSuffix(dir, "/") {
-		//nolint:errcheck
-		cmd.Flag("destination").Value.Set(dir + "/")
 	}
 
 	return nil
@@ -71,31 +65,33 @@ func execute(cmd *cobra.Command, args []string) error {
 		filename = fmt.Sprintf("%s-%s.jar", serverType, version)
 	}
 
+	outPath := path.Join(dir, filename)
+
 	fmt.Println("Using Values:")
 	fmt.Printf("- type: %s\n", serverType)
 	fmt.Printf("- version: %s\n", version)
 	if serverType != flags.Vanilla.String() {
 		fmt.Printf("- build: %s\n", build)
 	}
-	fmt.Printf("- output: %s\n", dir+filename)
+	fmt.Printf("- output: %s\n", outPath)
 
 	switch serverType {
 	case flags.Vanilla.String():
-		return vanilla.JarHandler(version, dir, filename)
+		return vanilla.JarHandler(version, outPath)
 	case flags.Paper.String():
-		return paper.JarHandler(flags.Paper.String(), version, build, dir, filename)
+		return paper.JarHandler(flags.Paper.String(), version, build, outPath)
 	case flags.Folia.String():
-		return paper.JarHandler(flags.Folia.String(), version, build, dir, filename)
+		return paper.JarHandler(flags.Folia.String(), version, build, outPath)
 	case flags.Velocity.String():
-		return paper.JarHandler(flags.Velocity.String(), version, build, dir, filename)
+		return paper.JarHandler(flags.Velocity.String(), version, build, outPath)
 	case flags.Purpur.String():
-		return purpur.JarHandler(version, build, dir, filename)
+		return purpur.JarHandler(version, build, outPath)
 	case flags.Fabric.String():
-		return fabric.JarHandler(version, dir, filename)
+		return fabric.JarHandler(version, outPath)
 	case flags.Neoforge.String():
-		return neoforge.JarHandler(version, build, dir, filename, isVerbose)
+		return neoforge.JarHandler(version, build, outPath, isVerbose)
 	case flags.Forge.String():
-		return forge.JarHandler(version, build, dir, filename, isVerbose)
+		return forge.JarHandler(version, build, outPath, isVerbose)
 	default:
 		//nolint:errcheck
 		cmd.Usage()

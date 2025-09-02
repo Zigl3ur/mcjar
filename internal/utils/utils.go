@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
@@ -46,13 +47,24 @@ func (wc *WriteCounter) Write(p []byte) (int, error) {
 	return n, nil
 }
 
-func WriteToFs(url, dir, filename string) error {
+func WriteToFs(url, outPath string) error {
 
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		if AskConfirm("Directory not found. Create it ?") {
+	dir, filename := filepath.Split(outPath)
+
+	// spliting outpath with ./ or . return an empty dir
+	if dir == "" {
+		dir = "."
+	}
+
+	stat, err := os.Stat(dir)
+
+	if os.IsNotExist(err) || !stat.IsDir() {
+		if AskConfirm(fmt.Sprintf("Directory not found. Create \"%s\" ?", dir)) {
 			if err = os.Mkdir(dir, 0755); err != nil {
 				return err
 			}
+		} else {
+			return nil
 		}
 	}
 
@@ -64,9 +76,7 @@ func WriteToFs(url, dir, filename string) error {
 	//nolint:errcheck
 	defer resp.Body.Close()
 
-	// dir will always end with "/" cause its checked in commands prerun func
-	filepath := dir + filename
-	file, err := os.Create(filepath)
+	file, err := os.Create(dir + filename)
 	if err != nil {
 		return errors.New("failed to create output file")
 	}

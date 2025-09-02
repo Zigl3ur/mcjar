@@ -37,12 +37,12 @@ func ListHandler(snapshots bool) error {
 	return nil
 }
 
-func JarHandler(version, dir, filename string) error {
+func JarHandler(version, outPath string) error {
 	url, err := getUrl(version)
 	if err != nil {
 		return err
 	}
-	return utils.WriteToFs(url, dir, filename)
+	return utils.WriteToFs(url, outPath)
 }
 
 type Versions struct {

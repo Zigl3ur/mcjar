@@ -34,7 +34,7 @@ func Start(message string) {
 				case <-finish:
 					return
 				case <-ticker.C:
-					fmt.Printf("\r%s %s", g, loaderMsg)
+					fmt.Printf("\r\033[K%s %s", g, loaderMsg)
 				}
 			}
 		}

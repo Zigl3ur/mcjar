@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"path"
 	"slices"
 	"strings"
 
@@ -115,7 +116,7 @@ func Download(slug, version, loader, dir string) error {
 	}
 
 	for _, f := range data[idx].Files {
-		if err := utils.WriteToFs(f.Url, dir, f.Filename); err != nil {
+		if err := utils.WriteToFs(f.Url, path.Join(dir, f.Filename)); err != nil {
 			return fmt.Errorf("failed to download %s", f.Filename)
 		}
 	}
@@ -180,7 +181,7 @@ func MrPackHandler(packPath, modsDir string, isVerbose bool) error {
 			parsedUrl := strings.Split(urlDownload, "/")
 			filename := parsedUrl[len(parsedUrl)-1]
 			if d.Env.Server == "required" {
-				if err := utils.WriteToFs(urlDownload, modsDir, filename); err != nil {
+				if err := utils.WriteToFs(urlDownload, path.Join(modsDir, filename)); err != nil {
 					fmt.Printf("Failed to get %s", filename)
 				}
 			}

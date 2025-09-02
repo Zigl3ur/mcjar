@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path"
 	"slices"
 	"strings"
 
@@ -54,13 +55,13 @@ func ListHandler(version string, versionChanged, snapshots bool) error {
 	return nil
 }
 
-func JarHandler(version, build, dir, filename string, isVerbose bool) error {
+func JarHandler(version, build, outPath string, isVerbose bool) error {
 	url, err := getUrl(version, build)
 	if err != nil {
 		return err
 	}
 
-	if err = utils.WriteToFs(url, dir, filename); err != nil {
+	if err = utils.WriteToFs(url, outPath); err != nil {
 		return err
 	}
 
@@ -69,7 +70,8 @@ func JarHandler(version, build, dir, filename string, isVerbose bool) error {
 		return err
 	}
 
-	cmd := exec.Command(java, "-jar", dir+filename, "--installServer", dir)
+	dir, _ := path.Split(outPath)
+	cmd := exec.Command(java, "-jar", outPath, "--installServer", dir)
 
 	if isVerbose {
 		cmd.Stdout = os.Stdout
