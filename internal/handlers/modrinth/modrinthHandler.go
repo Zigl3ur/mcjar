@@ -6,13 +6,11 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"slices"
 	"strings"
 
 	"github.com/Zigl3ur/mcli/internal/utils"
-	"github.com/Zigl3ur/mcli/internal/utils/loader"
 	"github.com/google/uuid"
 )
 
@@ -144,31 +142,20 @@ func Download(slug, version, loader, dir string) (string, error) {
 
 func MrPackHandler(packPath, modsDir string, isVerbose bool) error {
 
-	unzip, err := utils.GetPath("unzip")
-	if err != nil {
+	uuid := uuid.New()
+	output := filepath.Join(os.TempDir(), fmt.Sprintf("mcli-%s", uuid))
+
+	_ = os.MkdirAll(output, 0755)
+
+	if err := utils.ExtractIndexJson(packPath, output); err != nil {
 		return err
 	}
 
-	uuid := uuid.New()
-	output := fmt.Sprintf("/tmp/mcli-%s", uuid)
-
-	cmd := exec.Command(unzip, packPath, "-d", output)
-
-	if isVerbose {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-	} else {
-		loader.Start("Extracting modpack archive")
-	}
-
-	if err = cmd.Run(); err != nil {
-		loader.Stop()
-		return errors.New("failed to extract modpack")
-	}
-
 	_, fileMrpack := filepath.Split(packPath)
+
 	//nolint:errcheck
 	defer os.Remove(filepath.Join(modsDir, fileMrpack))
+
 	//nolint:errcheck
 	defer os.RemoveAll(output)
 
