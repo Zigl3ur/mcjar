@@ -1,17 +1,14 @@
 package modrinth
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/url"
-	"os"
 	"path/filepath"
 	"slices"
 	"strings"
 
 	"github.com/Zigl3ur/mcli/internal/utils"
-	"github.com/google/uuid"
 )
 
 type SearchResult struct {
@@ -49,16 +46,6 @@ type DownloadData struct {
 		ProjectId      string `json:"project_id"`
 		DependencyType string `json:"dependency_type"`
 	} `json:"dependencies"`
-}
-
-type ModsIndex struct {
-	Files []struct {
-		Env struct {
-			Client string `json:"client"`
-			Server string `json:"server"`
-		} `json:"env"`
-		Downloads []string `json:"downloads"`
-	} `json:"files"`
 }
 
 func Search(query, index, facets string, limit int) (SearchResult, error) {
@@ -118,7 +105,7 @@ func Download(slug, version, loader, dir string) (string, error) {
 		formattedFilename := strings.ReplaceAll(f.Filename, " ", "_")
 		fullPath := filepath.Join(dir, formattedFilename)
 
-		// return filepath for mrpack cause need to extract it
+		// get filepath for mrpack cause need to extract it
 		if filepath.Ext(f.Filename) == ".mrpack" {
 			filePath = fullPath
 		}
@@ -138,51 +125,4 @@ func Download(slug, version, loader, dir string) (string, error) {
 	}
 
 	return filePath, nil
-}
-
-func MrPackHandler(packPath, modsDir string, isVerbose bool) error {
-
-	uuid := uuid.New()
-	output := filepath.Join(os.TempDir(), fmt.Sprintf("mcli-%s", uuid))
-
-	_ = os.MkdirAll(output, 0755)
-
-	if err := utils.ExtractIndexJson(packPath, output); err != nil {
-		return err
-	}
-
-	_, fileMrpack := filepath.Split(packPath)
-
-	//nolint:errcheck
-	defer os.Remove(filepath.Join(modsDir, fileMrpack))
-
-	//nolint:errcheck
-	defer os.RemoveAll(output)
-
-	modsIndexPath := fmt.Sprintf("%s/modrinth.index.json", output)
-
-	modsIndex, err := os.Open(modsIndexPath)
-	if err != nil {
-		return errors.New("failed to open modpack index file")
-	}
-
-	var modsData ModsIndex
-	if err := json.NewDecoder(modsIndex).Decode(&modsData); err != nil {
-		return err
-	}
-
-	for _, d := range modsData.Files {
-		for _, urlDownload := range d.Downloads {
-			urlDownload, _ = url.QueryUnescape(urlDownload)
-			parsedUrl := strings.Split(urlDownload, "/")
-			filename := parsedUrl[len(parsedUrl)-1]
-			if d.Env.Server == "required" {
-				if err := utils.WriteToFs(urlDownload, filepath.Join(modsDir, filename)); err != nil {
-					fmt.Printf("Failed to get %s", filename)
-				}
-			}
-		}
-	}
-
-	return nil
 }

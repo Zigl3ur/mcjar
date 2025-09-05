@@ -45,21 +45,19 @@ func WriteToFs(url, outPath string) error {
 
 	dir, filename := filepath.Split(outPath)
 
-	// TODO FIX, if given dir is . its considered as an empty string
-	// if dir == "" {
-	// 	dir, _ = os.Getwd()
-	// }
+	if dir == "" {
+		dir, _ = os.Getwd()
+	} else {
+		_, err := os.Stat(dir)
 
-	stat, err := os.Stat(dir)
-
-	if os.IsNotExist(err) || !stat.IsDir() {
-		if AskConfirm(fmt.Sprintf("Directory not found. Create \"%s\" ?", dir)) {
-			// todo: mkdirall return nil if dir already exist maybe remove stats
-			if err = os.MkdirAll(dir, 0755); err != nil {
+		if err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				if err = os.MkdirAll(dir, 0755); err != nil {
+					return err
+				}
+			} else {
 				return err
 			}
-		} else {
-			return nil
 		}
 	}
 
@@ -71,7 +69,7 @@ func WriteToFs(url, outPath string) error {
 	//nolint:errcheck
 	defer resp.Body.Close()
 
-	file, err := os.Create(dir + filename)
+	file, err := os.Create(filepath.Join(dir, filename))
 	if err != nil {
 		return errors.New("failed to create output file")
 	}

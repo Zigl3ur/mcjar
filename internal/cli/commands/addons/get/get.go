@@ -6,6 +6,7 @@ import (
 
 	"github.com/Zigl3ur/mcli/internal/cli/flags"
 	"github.com/Zigl3ur/mcli/internal/handlers/modrinth"
+	"github.com/Zigl3ur/mcli/internal/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -58,7 +59,7 @@ func execute(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	if err = modrinth.MrPackHandler(filePath, dir, isVerbose); err != nil {
+	if err = utils.MrPackHandler(filePath, dir, isVerbose); err != nil {
 		return err
 	}
 
