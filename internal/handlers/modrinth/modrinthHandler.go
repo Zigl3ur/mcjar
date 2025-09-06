@@ -22,16 +22,15 @@ type SearchResult struct {
 }
 
 type SlugData struct {
-	ClientSide   string   `json:"client_side"`
-	ServerSide   string   `json:"server_side"`
-	GameVersions []string `json:"game_versions"`
-	Title        string   `json:"title"`
-	Description  string   `json:"description"`
-	CreatedAt    string   `json:"published"`
-	UpdatedAt    string   `json:"updated"`
-	Downloads    int      `json:"downloads"`
-	Categories   []string `json:"categories"`
-	Loaders      []string `json:"loaders"`
+	ClientSide      string `json:"client_side"`
+	ServerSide      string `json:"server_side"`
+	LoadersVersions map[string][]string
+	Title           string   `json:"title"`
+	Description     string   `json:"description"`
+	CreatedAt       string   `json:"published"`
+	UpdatedAt       string   `json:"updated"`
+	Downloads       int      `json:"downloads"`
+	Categories      []string `json:"categories"`
 }
 
 type DownloadData struct {
@@ -77,10 +76,31 @@ func Info(slug string) (SlugData, error) {
 
 	if status, err := utils.GetReqJson(url, &slugData); err != nil {
 		if status == http.StatusNotFound {
-			return slugData, fmt.Errorf("no info found for %s (check slug): %w", slug, err)
+			return slugData, fmt.Errorf("no info found for \"%s\" (check slug): %w", slug, err)
 		}
 		return slugData, fmt.Errorf("failed to fetch %s info from Modrinth API (HTTP %d): %w", slug, status, err)
 	}
+
+	var downloadData []DownloadData
+	loadersVersions := make(map[string][]string)
+	if status, err := utils.GetReqJson(url+"/version", &downloadData); err != nil {
+		if status == http.StatusNotFound {
+			return slugData, fmt.Errorf("no download data found for \"%s\" (check slug): %w", slug, err)
+		}
+		return slugData, fmt.Errorf("failed to fetch %s download data from Modrinth API (HTTP %d): %w", slug, status, err)
+	}
+
+	for _, data := range downloadData {
+		for _, loaderName := range data.Loaders {
+			for _, gameVersion := range data.GameVersions {
+				if !slices.Contains(loadersVersions[loaderName], gameVersion) {
+					loadersVersions[loaderName] = append(loadersVersions[loaderName], gameVersion)
+				}
+			}
+		}
+	}
+
+	slugData.LoadersVersions = loadersVersions
 
 	return slugData, nil
 }
@@ -90,7 +110,7 @@ func Download(slug, version, loader, dir string) (string, error) {
 
 	if status, err := utils.GetReqJson(fmt.Sprintf("https://api.modrinth.com/v2/project/%s/version", slug), &downloadData); err != nil {
 		if status == http.StatusNotFound {
-			return "", fmt.Errorf("no downloads found for %s (check slug): %w", slug, err)
+			return "", fmt.Errorf("no downloads found for \"%s\" (check slug): %w", slug, err)
 		}
 		return "", fmt.Errorf("failed to fetch %s downloads from Modrinth API (HTTP %d): %w", slug, status, err)
 	}

@@ -49,11 +49,12 @@ func execute(cmd *cobra.Command, args []string) error {
   - Compatibility:
 	Server: %s
 	Client: %s
-  - Loader:
-	%s
-  - Game Versions:
-	%s
-`, result.Title, result.Description, result.Downloads, updatedAtFormated, createdAtFormated, result.Categories, result.ServerSide, result.ClientSide, result.Loaders, result.GameVersions)
+`, result.Title, result.Description, result.Downloads, updatedAtFormated, createdAtFormated, result.Categories, result.ServerSide, result.ClientSide)
+
+	fmt.Println("  - Versions:")
+	for loader, versions := range result.LoadersVersions {
+		fmt.Printf("        %s: %s\n", loader, versions)
+	}
 
 	return nil
 }
