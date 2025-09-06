@@ -82,7 +82,7 @@ func JarHandler(version, build, outPath string, isVerbose bool) error {
 
 	if err = cmd.Run(); err != nil {
 		loader.Stop()
-		return errors.New("failed to install neoforge server")
+		return err
 	}
 
 	loader.Stop()
@@ -121,22 +121,22 @@ func getVersionsList() (map[string][]string, error) {
 	}
 
 	var list NeoforgeVersions
-	if err := utils.GetReqJson("https://maven.neoforged.net/api/maven/versions/releases/net/neoforged/neoforge", &list); err != nil {
-		return nil, errors.New("failed to fetch neoforge versions")
+	if status, err := utils.GetReqJson("https://maven.neoforged.net/api/maven/versions/releases/net/neoforged/neoforge", &list); err != nil {
+		return nil, fmt.Errorf("[%d] Failed to get neoforge versions list", status)
 	}
 
 	versionMap := make(map[string][]string)
 
-	for _, v := range list.Versions {
+	for _, version := range list.Versions {
 		// remove april fools versions
-		if !strings.HasPrefix(v, "0") {
-			parts := strings.SplitN(v, ".", 3)
-			version := fmt.Sprintf("1.%s", parts[0])
+		if !strings.HasPrefix(version, "0") {
+			parts := strings.SplitN(version, ".", 3)
+			v := fmt.Sprintf("1.%s", parts[0])
 			build := strings.Join(parts, ".")
 			if len(parts) > 1 {
-				version = fmt.Sprintf("1.%s.%s", parts[0], parts[1])
+				v = fmt.Sprintf("1.%s.%s", parts[0], parts[1])
 			}
-			versionMap[version] = append(versionMap[version], build)
+			versionMap[v] = append(versionMap[v], build)
 		}
 	}
 

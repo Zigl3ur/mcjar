@@ -24,12 +24,12 @@ func ListHandler(version string, snapshots bool) error {
 	loader.Stop()
 
 	if !snapshots {
-		for _, v := range versionsMap["versions"] {
-			fmt.Printf("- %s\n", v)
+		for _, version := range versionsMap["versions"] {
+			fmt.Printf("- %s\n", version)
 		}
 	} else {
-		for _, s := range versionsMap["snapshots"] {
-			fmt.Printf("- %s\n", s)
+		for _, snapshot := range versionsMap["snapshots"] {
+			fmt.Printf("- %s\n", snapshot)
 		}
 	}
 
@@ -69,8 +69,8 @@ type FabricVersion struct {
 func getVersionsList() (FabricVersion, error) {
 
 	var versions FabricVersion
-	if err := utils.GetReqJson("https://meta.fabricmc.net/v2/versions", &versions); err != nil {
-		return versions, errors.New("failed to fetch fabric versions")
+	if status, err := utils.GetReqJson("https://meta.fabricmc.net/v2/versions", &versions); err != nil {
+		return versions, fmt.Errorf("failed to fetch Fabric versions from API (HTTP %d): %w", status, err)
 	}
 
 	return versions, nil
@@ -84,13 +84,13 @@ func getStableLoader() (string, error) {
 	}
 
 	var list LoaderList
-	if err := utils.GetReqJson("https://meta.fabricmc.net/v2/versions/loader", &list); err != nil {
-		return "", errors.New("failed to fetch fabric loaders")
+	if status, err := utils.GetReqJson("https://meta.fabricmc.net/v2/versions/loader", &list); err != nil {
+		return "", fmt.Errorf("failed to fetch Fabric loader versions from API (HTTP %d): %w", status, err)
 	}
 
-	for _, l := range list {
-		if l.Stable {
-			return l.Version, nil
+	for _, loader := range list {
+		if loader.Stable {
+			return loader.Version, nil
 		}
 	}
 
@@ -98,22 +98,21 @@ func getStableLoader() (string, error) {
 }
 
 func getStableInstaller() (string, error) {
-
 	type InstallerList []struct {
 		Version string `json:"version"`
 		Stable  bool   `json:"stable"`
 	}
 
 	var list InstallerList
-	if err := utils.GetReqJson("https://meta.fabricmc.net/v2/versions/installer", &list); err != nil {
-		return "", errors.New("failed to fetch fabric installers")
+	if status, err := utils.GetReqJson("https://meta.fabricmc.net/v2/versions/installer", &list); err != nil {
+		return "", fmt.Errorf("failed to fetch Fabric installer versions from API (HTTP %d): %w", status, err)
 	}
 
-	for _, l := range list {
-		if l.Stable {
-			return l.Version, nil
+	for _, installer := range list {
+		if installer.Stable {
+			return installer.Version, nil
 		}
 	}
 
-	return "", errors.New("no stable fabric installer found")
+	return "", errors.New("no stable Fabric installer version found")
 }

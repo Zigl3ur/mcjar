@@ -12,7 +12,7 @@ import (
 
 func NewCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "get",
+		Use:     "get [slug]",
 		Short:   "Dowload plugin / mod / modpack and datapack from modrinth",
 		Long:    "Download a plugin / mod / modpack and datapack from modrinth",
 		Args:    cobra.ExactArgs(1),
@@ -22,9 +22,11 @@ func NewCommand() *cobra.Command {
 
 	cmd.Flags().StringP("version", "v", "", "the game version (required)")
 	cmd.Flags().StringP("loader", "l", "", "the loader to be compatible with (required)")
-	cmd.Flags().StringP("destination", "d", "", "the folder where to put the downloaded jar")
+	cmd.Flags().StringP("destination", "d", "", "the folder where to put the downloaded jar, it will be created if it doesn't exist")
 
+	cmd.Flags().SortFlags = false
 	cmd.MarkFlagsRequiredTogether("loader", "version")
+
 	//nolint:errcheck
 	cmd.MarkFlagDirname("destination")
 

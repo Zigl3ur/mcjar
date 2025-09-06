@@ -3,7 +3,6 @@ package purpur
 import (
 	"errors"
 	"fmt"
-	"log"
 	"slices"
 
 	"github.com/Zigl3ur/mcli/internal/utils"
@@ -27,7 +26,7 @@ func ListHandler(version string, versionChanged, snapshots bool) error {
 		if slices.Contains(versionsMap["versions"], version) || slices.Contains(versionsMap["snapshots"], version) {
 			blist, err := getBuildList(version)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 			fmt.Printf("- %s\n", version)
 			for _, b := range blist {
@@ -96,8 +95,8 @@ func getVersionsList() ([]string, error) {
 	}
 
 	var versions PurpurVersion
-	if err := utils.GetReqJson("https://api.purpurmc.org/v2/purpur", &versions); err != nil {
-		return nil, errors.New("failed to fetch version details")
+	if status, err := utils.GetReqJson("https://api.purpurmc.org/v2/purpur", &versions); err != nil {
+		return nil, fmt.Errorf("failed to fetch Pupur versions from API (HTTP %d): %w", status, err)
 	}
 
 	slices.Reverse(versions.List)
@@ -113,8 +112,8 @@ func getBuildList(version string) ([]string, error) {
 	}
 
 	var builds PurpurBuilds
-	if err := utils.GetReqJson(fmt.Sprintf("https://api.purpurmc.org/v2/purpur/%s", version), &builds); err != nil {
-		return nil, errors.New("failed to fetch purpur build list")
+	if status, err := utils.GetReqJson(fmt.Sprintf("https://api.purpurmc.org/v2/purpur/%s", version), &builds); err != nil {
+		return nil, fmt.Errorf("failed to fetch Purpur %s builds from API (HTTP %d): %w", version, status, err)
 	}
 
 	slices.Reverse(builds.Builds.List)

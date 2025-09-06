@@ -1,7 +1,6 @@
 package forge
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -22,8 +21,8 @@ func ListHandler(version string, versionChanged, snapshots bool) error {
 
 	vlist := make([]string, 0, len(rawList))
 
-	for k := range rawList {
-		vlist = append(vlist, k)
+	for key := range rawList {
+		vlist = append(vlist, key)
 	}
 
 	versionsMap := utils.SortMcVersions(vlist)
@@ -40,15 +39,15 @@ func ListHandler(version string, versionChanged, snapshots bool) error {
 		}
 	} else if snapshots {
 		if len(versionsMap["snapshots"]) > 0 {
-			for _, s := range versionsMap["snapshots"] {
-				fmt.Printf("- %s\n", s)
+			for _, snapshot := range versionsMap["snapshots"] {
+				fmt.Printf("- %s\n", snapshot)
 			}
 		} else {
 			return fmt.Errorf("forge doesn't support snapshots")
 		}
 	} else {
-		for _, v := range versionsMap["versions"] {
-			fmt.Printf("- %s\n", v)
+		for _, version := range versionsMap["versions"] {
+			fmt.Printf("- %s\n", version)
 		}
 	}
 
@@ -81,7 +80,7 @@ func JarHandler(version, build, outPath string, isVerbose bool) error {
 
 	if err = cmd.Run(); err != nil {
 		loader.Stop()
-		return errors.New("failed to install forge server")
+		return err
 	}
 
 	loader.Stop()
@@ -124,18 +123,18 @@ func getVersionsList() (map[string][]string, error) {
 	}
 
 	var versions ForgeVersions
-	if err := utils.GetReqXml("https://maven.minecraftforge.net/net/minecraftforge/forge/maven-metadata.xml", &versions); err != nil {
-		return nil, errors.New("failed to fetch forge versions")
+	if status, err := utils.GetReqXml("https://maven.minecraftforge.net/net/minecraftforge/forge/maven-metadata.xml", &versions); err != nil {
+		return nil, fmt.Errorf("failed to fetch Forge installer versions from API (HTTP %d): %w", status, err)
 	}
 
 	versionMap := make(map[string][]string)
 
-	for _, v := range versions.Versioning.Versions {
-		parts := strings.Split(v, "-")
+	for _, version := range versions.Versioning.Versions {
+		parts := strings.Split(version, "-")
 		if len(parts) >= 2 {
-			version := parts[0]
-			build := parts[1]
-			versionMap[version] = append(versionMap[version], build)
+			v := parts[0]
+			b := parts[1]
+			versionMap[v] = append(versionMap[v], b)
 		}
 	}
 

@@ -77,7 +77,7 @@ func MrPackHandler(packPath, modsDir string, isVerbose bool) error {
 
 	modsIndex, err := os.Open(modsIndexPath)
 	if err != nil {
-		return errors.New("failed to open modpack index file")
+		return errors.New("failed to open modrinth.index.json file")
 	}
 
 	var modsData ModsIndex

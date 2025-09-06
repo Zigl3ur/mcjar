@@ -71,7 +71,7 @@ func WriteToFs(url, outPath string) error {
 
 	file, err := os.Create(filepath.Join(dir, filename))
 	if err != nil {
-		return errors.New("failed to create output file")
+		return err
 	}
 
 	//nolint:errcheck
@@ -81,7 +81,7 @@ func WriteToFs(url, outPath string) error {
 
 	counter := &WriteCounter{StartTime: time.Now(), ContentLength: resp.ContentLength, filename: filename}
 	if _, err = io.Copy(file, io.TeeReader(resp.Body, counter)); err != nil {
-		return errors.New("failed to create output file")
+		return err
 	}
 
 	loader.Stop()
@@ -90,34 +90,42 @@ func WriteToFs(url, outPath string) error {
 	return nil
 }
 
-func GetReqJson(url string, dataJson any) error {
+func GetReqJson(url string, dataJson any) (int, error) {
 	resp, err := http.Get(url)
 	if err != nil {
-		return err
+		return 0, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return resp.StatusCode, errors.New(resp.Status)
 	}
 
 	//nolint:errcheck
 	defer resp.Body.Close()
 
 	if err := json.NewDecoder(resp.Body).Decode(&dataJson); err != nil {
-		return err
+		return resp.StatusCode, err
 	}
 
-	return nil
+	return resp.StatusCode, nil
 }
 
-func GetReqXml(url string, dataXml any) error {
+func GetReqXml(url string, dataXml any) (int, error) {
 	resp, err := http.Get(url)
 	if err != nil {
-		return err
+		return 0, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return resp.StatusCode, errors.New("not ok status")
 	}
 
 	//nolint:errcheck
 	defer resp.Body.Close()
 
 	if err := xml.NewDecoder(resp.Body).Decode(&dataXml); err != nil {
-		return err
+		return resp.StatusCode, err
 	}
 
-	return nil
+	return resp.StatusCode, nil
 }

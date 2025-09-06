@@ -1,7 +1,6 @@
 package vanilla
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/Zigl3ur/mcli/internal/utils"
@@ -79,13 +78,13 @@ func getUrl(version string) (string, error) {
 	}
 
 	var downloadData DownloadData
-	if err := utils.GetReqJson(versionUrl, &downloadData); err != nil {
-		return "", errors.New("failed to fetch version details")
+	if status, err := utils.GetReqJson(versionUrl, &downloadData); err != nil {
+		return "", fmt.Errorf("failed to fetch Vanilla download url from API (HTTP %d): %w", status, err)
 	}
 
 	serverUrl := downloadData.Downloads.Server.Url
 	if serverUrl == "" {
-		return "", fmt.Errorf("no vanilla jar available for specified version (given: %s)", version)
+		return "", err
 	}
 
 	return serverUrl, nil
@@ -94,8 +93,8 @@ func getUrl(version string) (string, error) {
 func getVersionsList() (Versions, error) {
 
 	var versions Versions
-	if err := utils.GetReqJson("https://launchermeta.mojang.com/mc/game/version_manifest.json", &versions); err != nil {
-		return versions, errors.New("failed to fetch version manifest")
+	if status, err := utils.GetReqJson("https://launchermeta.mojang.com/mc/game/version_manifest.json", &versions); err != nil {
+		return versions, fmt.Errorf("failed to fetch Vanilla versions from API (HTTP %d): %w", status, err)
 	}
 
 	return versions, nil

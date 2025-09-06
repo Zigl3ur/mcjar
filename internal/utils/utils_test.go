@@ -125,15 +125,11 @@ func TestISO8601Format(t *testing.T) {
 		{"2023-01-01T00:00:00Z", "Jan 1, 2023, 12:00 AM", false},
 		{"1999-07-04T12:30:15Z", "Jul 4, 1999, 12:30 PM", false},
 		{"2020-02-29T23:59:59Z", "Feb 29, 2020, 11:59 PM", false},
-		{"obviously not a date", "", true},
+		{"obviously not a date", "obviously not a date", false},
 	}
 
 	for _, tt := range tests {
-		result, err := Iso8601Format(tt.given)
-
-		if (err != nil) != tt.err {
-			t.Error("got an error, didn't expected one")
-		}
+		result := Iso8601Format(tt.given)
 
 		if result != tt.expected {
 			t.Errorf("got %s, expected %s", result, tt.expected)

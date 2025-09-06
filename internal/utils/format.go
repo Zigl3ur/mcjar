@@ -8,15 +8,15 @@ import (
 	"time"
 )
 
-func Iso8601Format(date string) (string, error) {
+func Iso8601Format(date string) string {
 	layout := "2006-01-02T15:04:05Z"
 	t, err := time.Parse(layout, date)
 
 	if err != nil {
-		return "", err
+		return date
 	}
 
-	return t.Format("Jan 2, 2006, 03:04 PM"), nil
+	return t.Format("Jan 2, 2006, 03:04 PM")
 }
 
 func SortMcVersions(versions []string) map[string][]string {

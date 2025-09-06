@@ -1,8 +1,8 @@
 package modrinth
 
 import (
-	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 	"path/filepath"
 	"slices"
@@ -62,35 +62,42 @@ func Search(query, index, facets string, limit int) (SearchResult, error) {
 		searchUrl = fmt.Sprintf("https://api.modrinth.com/v2/search?query=%s&limit=%d&index=%s", query, limit, index)
 	}
 
-	if err := utils.GetReqJson(searchUrl, &results); err != nil {
-		return results, errors.New("failed to query modrinth api")
+	if status, err := utils.GetReqJson(searchUrl, &results); err != nil {
+		return results, fmt.Errorf("failed to fetch search result for %s from Modrinth API (HTTP %d): %w", query, status, err)
+
 	}
 
 	return results, nil
 }
 
 func Info(slug string) (SlugData, error) {
-	var data SlugData
+	var slugData SlugData
 
 	url := fmt.Sprintf("https://api.modrinth.com/v2/project/%s", slug)
 
-	if err := utils.GetReqJson(url, &data); err != nil {
-		return data, errors.New("failed to query modrinth api (check slug)")
+	if status, err := utils.GetReqJson(url, &slugData); err != nil {
+		if status == http.StatusNotFound {
+			return slugData, fmt.Errorf("no info found for %s (check slug): %w", slug, err)
+		}
+		return slugData, fmt.Errorf("failed to fetch %s info from Modrinth API (HTTP %d): %w", slug, status, err)
 	}
 
-	return data, nil
+	return slugData, nil
 }
 
 func Download(slug, version, loader, dir string) (string, error) {
-	var data []DownloadData
+	var downloadData []DownloadData
 
-	if err := utils.GetReqJson(fmt.Sprintf("https://api.modrinth.com/v2/project/%s/version", slug), &data); err != nil {
-		return "", errors.New("failed to query specified slug")
+	if status, err := utils.GetReqJson(fmt.Sprintf("https://api.modrinth.com/v2/project/%s/version", slug), &downloadData); err != nil {
+		if status == http.StatusNotFound {
+			return "", fmt.Errorf("no downloads found for %s (check slug): %w", slug, err)
+		}
+		return "", fmt.Errorf("failed to fetch %s downloads from Modrinth API (HTTP %d): %w", slug, status, err)
 	}
 
 	idx := -1
-	for i, d := range data {
-		if slices.Contains(d.Loaders, loader) && slices.Contains(d.GameVersions, version) {
+	for i, data := range downloadData {
+		if slices.Contains(data.Loaders, loader) && slices.Contains(data.GameVersions, version) {
 			idx = i
 			break
 		}
@@ -101,24 +108,24 @@ func Download(slug, version, loader, dir string) (string, error) {
 	}
 
 	var filePath string
-	for _, f := range data[idx].Files {
-		formattedFilename := strings.ReplaceAll(f.Filename, " ", "_")
+	for _, file := range downloadData[idx].Files {
+		formattedFilename := strings.ReplaceAll(file.Filename, " ", "_")
 		fullPath := filepath.Join(dir, formattedFilename)
 
 		// get filepath for mrpack cause need to extract it
-		if filepath.Ext(f.Filename) == ".mrpack" {
+		if filepath.Ext(file.Filename) == ".mrpack" {
 			filePath = fullPath
 		}
-		if err := utils.WriteToFs(f.Url, fullPath); err != nil {
-			return "", fmt.Errorf("failed to download %s", formattedFilename)
+		if err := utils.WriteToFs(file.Url, fullPath); err != nil {
+			return "", err
 		}
 	}
 
-	if len(data[idx].Dependencies) > 0 {
-		for _, d := range data[idx].Dependencies {
-			if d.DependencyType == "required" {
-				if _, err := Download(d.ProjectId, version, loader, dir); err != nil {
-					fmt.Printf("failed to download dependency (%s)\n", d.ProjectId)
+	if len(downloadData[idx].Dependencies) > 0 {
+		for _, deps := range downloadData[idx].Dependencies {
+			if deps.DependencyType == "required" {
+				if _, err := Download(deps.ProjectId, version, loader, dir); err != nil {
+					return "", err
 				}
 			}
 		}

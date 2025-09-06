@@ -1,7 +1,6 @@
 package paper
 
 import (
-	"errors"
 	"fmt"
 	"slices"
 
@@ -80,8 +79,8 @@ func getUrl(project, version, build string) (string, error) {
 	}
 
 	var paperUrl PaperUrl
-	if err := utils.GetReqJson(fetchUrl, &paperUrl); err != nil {
-		return "", errors.New("failed to fetch version details")
+	if status, err := utils.GetReqJson(fetchUrl, &paperUrl); err != nil {
+		return "", fmt.Errorf("failed to fetch Paper download url from API (HTTP %d): %w", status, err)
 	}
 
 	serverUrl := paperUrl.Downloads.ServerDefault.Url
@@ -107,8 +106,8 @@ type PaperVersions struct {
 func getVersionsList(project string) (PaperVersions, error) {
 
 	var versions PaperVersions
-	if err := utils.GetReqJson(fmt.Sprintf("https://fill.papermc.io/v3/projects/%s/versions", project), &versions); err != nil {
-		return versions, fmt.Errorf("failed to fetch %s version list", project)
+	if status, err := utils.GetReqJson(fmt.Sprintf("https://fill.papermc.io/v3/projects/%s/versions", project), &versions); err != nil {
+		return versions, fmt.Errorf("failed to fetch Paper versions from API (HTTP %d): %w", status, err)
 	}
 
 	return versions, nil
@@ -121,8 +120,9 @@ type PaperBuild struct {
 func getBuildList(project, version string) ([]PaperBuild, error) {
 
 	var builds []PaperBuild
-	if err := utils.GetReqJson(fmt.Sprintf("https://fill.papermc.io/v3/projects/%s/versions/%s/builds?channel=STABLE", project, version), &builds); err != nil {
-		return nil, fmt.Errorf("failed to fetch %s build list", project)
+	if status, err := utils.GetReqJson(fmt.Sprintf("https://fill.papermc.io/v3/projects/%s/versions/%s/builds?channel=STABLE", project, version), &builds); err != nil {
+		return nil, fmt.Errorf("failed to fetch Paper %s builds from API (HTTP %d): %w", version, status, err)
+
 	}
 
 	return builds, nil

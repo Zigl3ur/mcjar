@@ -27,7 +27,7 @@ func NewCommand() *cobra.Command {
 	cmd.Flags().StringP("index", "i", "relevance", "sort search result")
 	cmd.Flags().StringArrayP("versions", "v", []string{}, "versions that results items must support")
 	cmd.Flags().StringP("loader", "l", "", "the minecraft loader")
-	cmd.Flags().BoolP("slug", "s", false, "show the slug of items that are used for info / download queries")
+	cmd.Flags().BoolP("slug", "s", false, "show the slug of items that are used for info / get commands")
 
 	cmd.Flags().SortFlags = false
 

@@ -18,6 +18,8 @@ func NewCommand() *cobra.Command {
 		RunE:  execute,
 	}
 
+	cmd.Flags().SortFlags = false
+
 	return cmd
 }
 
@@ -28,17 +30,12 @@ func execute(cmd *cobra.Command, args []string) error {
 
 	result, err := modrinth.Info(slug)
 	if err != nil {
+		loader.Stop()
 		return err
 	}
 
-	updatedAtFormated, err := utils.Iso8601Format(result.UpdatedAt)
-	if err != nil {
-		updatedAtFormated = result.UpdatedAt
-	}
-	createdAtFormated, err := utils.Iso8601Format(result.CreatedAt)
-	if err != nil {
-		createdAtFormated = result.CreatedAt
-	}
+	updatedAtFormated := utils.Iso8601Format(result.UpdatedAt)
+	createdAtFormated := utils.Iso8601Format(result.CreatedAt)
 
 	loader.Stop()
 
