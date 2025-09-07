@@ -3,6 +3,7 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"os"
 	"os/exec"
 )
 
@@ -17,4 +18,20 @@ func GetPath(file string) (string, error) {
 	}
 
 	return path, nil
+}
+
+func CheckDir(dir string) error {
+	_, err := os.Stat(dir)
+
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			if err = os.MkdirAll(dir, 0755); err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+	}
+
+	return nil
 }

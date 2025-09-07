@@ -8,6 +8,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/Zigl3ur/mcli/internal/cli/flags"
 	"github.com/Zigl3ur/mcli/internal/utils"
 )
 
@@ -92,9 +93,11 @@ func Info(slug string) (SlugData, error) {
 
 	for _, data := range downloadData {
 		for _, loaderName := range data.Loaders {
-			for _, gameVersion := range data.GameVersions {
-				if !slices.Contains(loadersVersions[loaderName], gameVersion) {
-					loadersVersions[loaderName] = append(loadersVersions[loaderName], gameVersion)
+			if slices.Contains(flags.ValidLoaders, loaderName) {
+				for _, gameVersion := range data.GameVersions {
+					if !slices.Contains(loadersVersions[loaderName], gameVersion) {
+						loadersVersions[loaderName] = append(loadersVersions[loaderName], gameVersion)
+					}
 				}
 			}
 		}
@@ -124,7 +127,7 @@ func Download(slug, version, loader, dir string) (string, error) {
 	}
 
 	if idx == -1 {
-		return "", fmt.Errorf("no suitable mod version found (loader: %s, game-version: %s)", loader, version)
+		return "", fmt.Errorf("no suitable mod version found for %s (loader: %s, game-version: %s)", slug, loader, version)
 	}
 
 	var filePath string

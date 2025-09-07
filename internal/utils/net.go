@@ -48,16 +48,8 @@ func WriteToFs(url, outPath string) error {
 	if dir == "" {
 		dir, _ = os.Getwd()
 	} else {
-		_, err := os.Stat(dir)
-
-		if err != nil {
-			if errors.Is(err, os.ErrNotExist) {
-				if err = os.MkdirAll(dir, 0755); err != nil {
-					return err
-				}
-			} else {
-				return err
-			}
+		if err := CheckDir(dir); err != nil {
+			return err
 		}
 	}
 

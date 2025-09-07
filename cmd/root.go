@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/Zigl3ur/mcli/internal/cli/commands/addons"
+	"github.com/Zigl3ur/mcli/internal/cli/commands/backup"
 	"github.com/Zigl3ur/mcli/internal/cli/commands/jar"
 	"github.com/spf13/cobra"
 )
@@ -27,5 +28,5 @@ func init() {
 	rootCmd.PersistentFlags().Bool("verbose", false, "show debug logs")
 
 	rootCmd.Flags().SortFlags = false
-	rootCmd.AddCommand(jar.NewCommand(), addons.NewCommand())
+	rootCmd.AddCommand(jar.NewCommand(), addons.NewCommand(), backup.NewCommand())
 }
