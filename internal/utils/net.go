@@ -109,7 +109,7 @@ func GetReqXml(url string, dataXml any) (int, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return resp.StatusCode, errors.New("not ok status")
+		return resp.StatusCode, errors.New(resp.Status)
 	}
 
 	//nolint:errcheck
