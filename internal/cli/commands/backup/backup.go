@@ -71,8 +71,7 @@ func execute(cmd *cobra.Command, args []string) error {
 		loader.Stop()
 		return err
 	}
-
-	now := time.Now().Format("2006-01-02-15h-04m")
+	now := time.Now().Format("2006-01-02_15-04-05")
 	archiveName := fmt.Sprintf("Backup-%s.zip", now)
 	archivePath := filepath.Join(destination, archiveName)
 	archive, err := os.Create(archivePath)

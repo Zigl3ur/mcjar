@@ -18,7 +18,6 @@ func ListHandler(snapshots bool) error {
 	for _, v := range rawList.Versions {
 		vlist = append(vlist, v.Id)
 	}
-
 	versionsMap := utils.SortMcVersions(vlist)
 
 	loader.Stop()
