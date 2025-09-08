@@ -9,7 +9,7 @@ func TestValidate(t *testing.T) {
 	}{
 		{"fabric", false},
 		{"forge", false},
-		{"", false},
+		{"", true},
 		{"invalid", true},
 	}
 
@@ -17,7 +17,9 @@ func TestValidate(t *testing.T) {
 
 	for _, tt := range test {
 		t.Run(tt.loader, func(t *testing.T) {
-			cmd.Flags().Set("loader", tt.loader)
+			if err := cmd.Flags().Set("loader", tt.loader); err != nil {
+				t.Fatal(err)
+			}
 			err := validate(cmd, []string{"test"})
 			if (err != nil) != tt.err {
 				t.Errorf("got error %v, expected error %v", err, tt.err)
