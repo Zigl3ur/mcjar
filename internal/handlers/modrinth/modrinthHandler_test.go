@@ -1,7 +1,6 @@
 package modrinth
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -11,7 +10,7 @@ import (
 func TestSearch(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `{
+		_, _ = w.Write([]byte(`{
 			"hits": [
 				{
 					"slug": "sodium",
@@ -26,7 +25,7 @@ func TestSearch(t *testing.T) {
 			],
 			"limit": 10,
 			"total_hits": 2
-		}`)
+		}`))
 	}))
 
 	baseUrl = mockServer.URL
@@ -66,7 +65,7 @@ func TestSearch(t *testing.T) {
 func TestSearchWithFacets(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `{
+		_, _ = w.Write([]byte(`{
 			"hits": [
 				{
 					"slug": "sodium",
@@ -76,7 +75,7 @@ func TestSearchWithFacets(t *testing.T) {
 			],
 			"limit": 5,
 			"total_hits": 1
-		}`)
+		}`))
 	}))
 
 	baseUrl = mockServer.URL
@@ -102,7 +101,7 @@ func TestInfo(t *testing.T) {
 
 	mux.HandleFunc("/project/sodium", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `{
+		_, _ = w.Write([]byte(`{
 			"title": "Sodium",
 			"description": "A modern rendering engine for Minecraft",
 			"client_side": "required",
@@ -111,12 +110,12 @@ func TestInfo(t *testing.T) {
 			"updated": "2023-08-15T10:30:45.123456Z",
 			"downloads": 15000000,
 			"categories": ["optimization", "utility"]
-		}`)
+		}`))
 	})
 
 	mux.HandleFunc("/project/sodium/version", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `[
+		_, _ = w.Write([]byte(`[
 			{
 				"game_versions": ["1.20.1", "1.20"],
 				"loaders": ["fabric", "forge"],
@@ -153,7 +152,7 @@ func TestInfo(t *testing.T) {
 				],
 				"dependencies": []
 			}
-		]`)
+		]`))
 	})
 
 	baseUrl = mockServer.URL
@@ -198,7 +197,7 @@ func TestInfo(t *testing.T) {
 func TestInfoNotFound(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprintln(w, `{"error": "Not Found"}`)
+		_, _ = w.Write([]byte(`{"error": "Not Found"}`))
 	}))
 
 	baseUrl = mockServer.URL

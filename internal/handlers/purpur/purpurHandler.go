@@ -97,7 +97,7 @@ func getVersionsList() ([]string, error) {
 	}
 
 	var versions PurpurVersion
-	if status, err := utils.GetReqJson(fmt.Sprintf("%s", baseUrl), &versions); err != nil {
+	if status, err := utils.GetReqJson(baseUrl, &versions); err != nil {
 		return nil, fmt.Errorf("failed to fetch Pupur versions from API (HTTP %d): %w", status, err)
 	}
 

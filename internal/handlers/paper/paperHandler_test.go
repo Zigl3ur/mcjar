@@ -1,7 +1,6 @@
 package paper
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -11,7 +10,7 @@ import (
 func TestGetVersionsList(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `{
+		_, _ = w.Write([]byte(`{
 			"versions": [
 				{
 					"version": {
@@ -41,7 +40,7 @@ func TestGetVersionsList(t *testing.T) {
 					"builds": [12, 11, 10]
 				}
 			]
-		}`)
+		}`))
 	}))
 
 	baseUrl = mockServer.URL
@@ -122,14 +121,14 @@ func TestGetBuildList(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		if r.URL.Path == "/paper/versions/1.20.1/builds" && r.URL.RawQuery == "channel=STABLE" {
-			fmt.Fprintln(w, `[
+			_, _ = w.Write([]byte(`[
 				{"id": 497},
 				{"id": 496},
 				{"id": 495}
-			]`)
+			]`))
 		} else if r.URL.Path == "/paper/versions/nonexistent/builds" {
 			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprintln(w, `{"error": "Version not found"}`)
+			_, _ = w.Write([]byte(`{"error": "Version not found"}`))
 		}
 	}))
 
@@ -170,27 +169,28 @@ func TestGetUrl(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 		switch r.URL.Path {
 		case "/paper/versions/1.20.1/builds/latest":
-			fmt.Fprintln(w, `{
+			_, _ = w.Write([]byte(`{
 				"downloads": {
 					"server:default": {
 						"url": "https://api.papermc.io/v2/projects/paper/versions/1.20.1/builds/497/downloads/paper-1.20.1-497.jar"
 					}
 				}
-			}`)
+			}`))
 		case "/paper/versions/1.20.1/builds/496":
-			fmt.Fprintln(w, `{
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{
 				"downloads": {
 					"server:default": {
 						"url": "https://api.papermc.io/v2/projects/paper/versions/1.20.1/builds/496/downloads/paper-1.20.1-496.jar"
 					}
 				}
-			}`)
+			}`))
 		case "/paper/versions/nonexistent/builds/latest":
 			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprintln(w, `{"error": "Version not found"}`)
+			_, _ = w.Write([]byte(`{"error": "Version not found"}`))
 		case "/paper/versions/1.20.1/builds/999":
 			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprintln(w, `{"error": "Build not found"}`)
+			_, _ = w.Write([]byte(`{"error": "Build not found"}`))
 		}
 	}))
 

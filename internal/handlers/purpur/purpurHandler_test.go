@@ -1,7 +1,6 @@
 package purpur
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -11,14 +10,14 @@ import (
 func TestGetVersionsList(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `{
+		_, _ = w.Write([]byte(`{
 			"versions": [
 				"1.20.1",
 				"1.19.4",
 				"1.19.3",
 				"1.18.2"
 			]
-		}`)
+		}`))
 	}))
 
 	baseUrl = mockServer.URL
@@ -44,7 +43,7 @@ func TestGetVersionsList(t *testing.T) {
 func TestGetBuildList(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `{
+		_, _ = w.Write([]byte(`{
 			"builds": {
 				"all": [
 					"2009",
@@ -53,7 +52,7 @@ func TestGetBuildList(t *testing.T) {
 					"2006"
 				]
 			}
-		}`)
+		}`))
 	}))
 
 	baseUrl = mockServer.URL
@@ -82,18 +81,18 @@ func TestGetUrl(t *testing.T) {
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `{
+		_, _ = w.Write([]byte(`{
 			"versions": [
 				"1.20.1",
 				"1.19.4",
 				"1.19.3"
 			]
-		}`)
+		}`))
 	})
 
 	mux.HandleFunc("/1.20.1", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `{
+		_, _ = w.Write([]byte(`{
 			"builds": {
 				"all": [
 					"2009",
@@ -101,12 +100,12 @@ func TestGetUrl(t *testing.T) {
 					"2007"
 				]
 			}
-		}`)
+		}`))
 	})
 
 	mux.HandleFunc("/1.19.4", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `{
+		_, _ = w.Write([]byte(`{
 			"builds": {
 				"all": [
 					"1903",
@@ -114,7 +113,7 @@ func TestGetUrl(t *testing.T) {
 					"1901"
 				]
 			}
-		}`)
+		}`))
 	})
 
 	baseUrl = mockServer.URL

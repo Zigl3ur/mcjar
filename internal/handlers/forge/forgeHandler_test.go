@@ -1,7 +1,6 @@
 package forge
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -11,7 +10,7 @@ import (
 func TestGetVersionsList(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/xml")
-		fmt.Fprintln(w, `<?xml version="1.0" encoding="UTF-8"?>
+		_, _ = w.Write([]byte(`<?xml version="1.0" encoding="UTF-8"?>
 		<metadata>
 			<versioning>
 				<latest>1.20.1-47.1.0</latest>
@@ -23,7 +22,7 @@ func TestGetVersionsList(t *testing.T) {
 					<version>1.19.4-45.2.0</version>
 				</versions>
 			</versioning>
-		</metadata>`)
+		</metadata>`))
 	}))
 
 	baseUrl = mockServer.URL
@@ -47,7 +46,7 @@ func TestGetVersionsList(t *testing.T) {
 func TestGetUrl(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/xml")
-		fmt.Fprintln(w, `<?xml version="1.0" encoding="UTF-8"?>
+		_, _ = w.Write([]byte(`<?xml version="1.0" encoding="UTF-8"?>
 		<metadata>
 			<versioning>
 				<latest>1.20.1-47.1.0</latest>
@@ -59,7 +58,7 @@ func TestGetUrl(t *testing.T) {
 					<version>1.19.4-45.2.0</version>
 				</versions>
 			</versioning>
-		</metadata>`)
+		</metadata>`))
 	}))
 
 	baseUrl = mockServer.URL

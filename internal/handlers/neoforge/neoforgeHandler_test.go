@@ -1,7 +1,6 @@
 package neoforge
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -11,14 +10,14 @@ import (
 func TestGetVersionsList(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `{
+		_, _ = w.Write([]byte(`{
 			"versions": [
 				"20.4.236",
 				"20.4.237",
 				"20.2.86",
 				"20.2.88"
 			]
-		}`)
+		}`))
 	}))
 
 	baseUrl = mockServer.URL
@@ -42,13 +41,13 @@ func TestGetVersionsList(t *testing.T) {
 func TestGetUrl(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `{
+		_, _ = w.Write([]byte(`{
 			"versions": [
 				"20.4.236",
 				"20.4.237",
 				"20.2.88"
 			]
-		}`)
+		}`))
 	}))
 
 	baseUrl = mockServer.URL

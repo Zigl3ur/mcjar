@@ -17,7 +17,7 @@ func TestGetReqJsonData(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		jsonBytes, _ := json.Marshal(jsonData)
-		w.Write(jsonBytes)
+		_, _ = w.Write(jsonBytes)
 	}))
 
 	defer mockServer.Close()
@@ -37,7 +37,7 @@ func TestGetReqJsonOK(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{}`))
+		_, _ = w.Write([]byte(`{}`))
 	}))
 
 	defer mockServer.Close()
@@ -83,7 +83,7 @@ func TestGetReqXmlData(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/xml")
 		xmlBytes, _ := xml.Marshal(xmlData)
-		w.Write(xmlBytes)
+		_, _ = w.Write(xmlBytes)
 	}))
 
 	defer mockServer.Close()
@@ -102,7 +102,7 @@ func TestGetReqXmlOK(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/xml")
-		w.Write([]byte(`<root></root>`))
+		_, _ = w.Write([]byte(`<root></root>`))
 	}))
 
 	defer mockServer.Close()

@@ -1,7 +1,6 @@
 package fabric
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -11,13 +10,13 @@ import (
 func TestGetVersionsList(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `{
+		_, _ = w.Write([]byte(`{
 			"game": [
 				{"version": "1.20.1", "stable": true},
 				{"version": "1.19.4", "stable": true},
 				{"version": "23w31a", "stable": false}
 			]
-		}`)
+		}`))
 	}))
 
 	baseUrl = mockServer.URL
@@ -48,11 +47,11 @@ func TestGetStableLoader(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/loader" {
 			w.Header().Set("Content-Type", "application/json")
-			fmt.Fprintln(w, `[
+			_, _ = w.Write([]byte(`[
 				{"version": "0.14.21", "stable": true},
 				{"version": "0.14.22", "stable": false},
 				{"version": "0.14.20", "stable": true}
-			]`)
+			]`))
 		}
 	}))
 
@@ -74,11 +73,11 @@ func TestGetStableInstaller(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/versions/installer" {
 			w.Header().Set("Content-Type", "application/json")
-			fmt.Fprintln(w, `[
+			_, _ = w.Write([]byte(`[
 				{"version": "0.11.2", "stable": true},
 				{"version": "0.11.3", "stable": false},
 				{"version": "0.11.1", "stable": true}
-			]`)
+			]`))
 		}
 	}))
 
@@ -102,12 +101,12 @@ func TestGetUrl(t *testing.T) {
 
 	mux.HandleFunc("/loader", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `[{"version": "0.14.21", "stable": true}]`)
+		_, _ = w.Write([]byte(`[{"version": "0.14.21", "stable": true}]`))
 	})
 
 	mux.HandleFunc("/versions/installer", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `[{"version": "0.11.2", "stable": true}]`)
+		_, _ = w.Write([]byte(`[{"version": "0.11.2", "stable": true}]`))
 	})
 
 	baseUrl = mockServer.URL

@@ -11,13 +11,13 @@ import (
 func TestGetVersionList(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `{
+		_, _ = w.Write([]byte(`{
 			"versions": [
 				{"id": "1.16.5", "url": "https://test.com/1.16.5.json"},
 				{"id": "1.17", "url": "https://test.com/1.17.json"},
 				{"id": "21w19a", "url": "https://test.com/21w19a.json"}
 			]
-		}`)
+		}`))
 	}))
 
 	manifestUrl = mockServer.URL
@@ -49,7 +49,7 @@ func TestGetUrl(t *testing.T) {
 	mockServer := httptest.NewServer(mux)
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintf(w, `{
+		_, _ = fmt.Fprintf(w, `{
 			"versions": [
 				{"id": "1.16.5", "url": "%s/1.16.5.json"},
 				{"id": "1.17", "url": "%s/1.17.json"},
@@ -60,29 +60,29 @@ func TestGetUrl(t *testing.T) {
 
 	mux.HandleFunc("/1.16.5.json", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `{
+		_, _ = w.Write([]byte(`{
 			"downloads": {
 				"server": {"url": "http://test.com/1.16.5-server.jar"}
 			}
-		}`)
+		}`))
 	})
 
 	mux.HandleFunc("/1.17.json", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `{
+		_, _ = w.Write([]byte(`{
 			"downloads": {
 				"server": {"url": "https://test.com/1.17-server.jar"}
 			}
-		}`)
+		}`))
 	})
 
 	mux.HandleFunc("/21w19a.json", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `{
+		_, _ = w.Write([]byte(`{
 			"downloads": {
 				"server": {"url": ""}
 			}
-		}`)
+		}`))
 	})
 
 	manifestUrl = mockServer.URL
