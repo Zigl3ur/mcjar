@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/Zigl3ur/mcli/internal/utils/loader"
+	"github.com/Zigl3ur/mcjar/internal/utils/loader"
 )
 
 type WriteCounter struct {
@@ -95,7 +95,7 @@ func GetReqJson(url string, dataJson any) (int, error) {
 	//nolint:errcheck
 	defer resp.Body.Close()
 
-	if err := json.NewDecoder(resp.Body).Decode(&dataJson); err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(dataJson); err != nil {
 		return resp.StatusCode, err
 	}
 
@@ -115,7 +115,7 @@ func GetReqXml(url string, dataXml any) (int, error) {
 	//nolint:errcheck
 	defer resp.Body.Close()
 
-	if err := xml.NewDecoder(resp.Body).Decode(&dataXml); err != nil {
+	if err := xml.NewDecoder(resp.Body).Decode(dataXml); err != nil {
 		return resp.StatusCode, err
 	}
 

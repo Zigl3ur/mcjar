@@ -3,9 +3,9 @@ package info
 import (
 	"fmt"
 
-	"github.com/Zigl3ur/mcli/internal/handlers/modrinth"
-	"github.com/Zigl3ur/mcli/internal/utils"
-	"github.com/Zigl3ur/mcli/internal/utils/loader"
+	"github.com/Zigl3ur/mcjar/internal/handlers/modrinth"
+	"github.com/Zigl3ur/mcjar/internal/utils"
+	"github.com/Zigl3ur/mcjar/internal/utils/loader"
 	"github.com/spf13/cobra"
 )
 

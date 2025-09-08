@@ -8,8 +8,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/Zigl3ur/mcli/internal/cli/flags"
-	"github.com/Zigl3ur/mcli/internal/utils"
+	"github.com/Zigl3ur/mcjar/internal/cli/flags"
+	"github.com/Zigl3ur/mcjar/internal/utils"
 )
 
 type SearchResult struct {
@@ -48,6 +48,8 @@ type DownloadData struct {
 	} `json:"dependencies"`
 }
 
+var baseUrl = "https://api.modrinth.com/v2"
+
 func Search(query, index, facets string, limit int) (SearchResult, error) {
 	var results SearchResult
 
@@ -57,9 +59,9 @@ func Search(query, index, facets string, limit int) (SearchResult, error) {
 	var searchUrl string
 	if facets != "" {
 		facets = url.QueryEscape(facets)
-		searchUrl = fmt.Sprintf("https://api.modrinth.com/v2/search?query=%s&limit=%d&index=%s&facets=%s", query, limit, index, facets)
+		searchUrl = fmt.Sprintf("%s/search?query=%s&limit=%d&index=%s&facets=%s", baseUrl, query, limit, index, facets)
 	} else {
-		searchUrl = fmt.Sprintf("https://api.modrinth.com/v2/search?query=%s&limit=%d&index=%s", query, limit, index)
+		searchUrl = fmt.Sprintf("%s/search?query=%s&limit=%d&index=%s", baseUrl, query, limit, index)
 	}
 
 	if status, err := utils.GetReqJson(searchUrl, &results); err != nil {
@@ -73,7 +75,7 @@ func Search(query, index, facets string, limit int) (SearchResult, error) {
 func Info(slug string) (SlugData, error) {
 	var slugData SlugData
 
-	url := fmt.Sprintf("https://api.modrinth.com/v2/project/%s", slug)
+	url := fmt.Sprintf("%s/project/%s", baseUrl, slug)
 
 	if status, err := utils.GetReqJson(url, &slugData); err != nil {
 		if status == http.StatusNotFound {
@@ -111,7 +113,7 @@ func Info(slug string) (SlugData, error) {
 func Download(slug, version, loader, dir string) (string, error) {
 	var downloadData []DownloadData
 
-	if status, err := utils.GetReqJson(fmt.Sprintf("https://api.modrinth.com/v2/project/%s/version", slug), &downloadData); err != nil {
+	if status, err := utils.GetReqJson(fmt.Sprintf("%s/project/%s/version", baseUrl, slug), &downloadData); err != nil {
 		if status == http.StatusNotFound {
 			return "", fmt.Errorf("no downloads found for \"%s\" (check slug): %w", slug, err)
 		}

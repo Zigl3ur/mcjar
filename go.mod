@@ -1,4 +1,4 @@
-module github.com/Zigl3ur/mcli
+module github.com/Zigl3ur/mcjar
 
 go 1.24.5
 

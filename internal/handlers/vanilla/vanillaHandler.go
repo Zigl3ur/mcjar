@@ -3,9 +3,11 @@ package vanilla
 import (
 	"fmt"
 
-	"github.com/Zigl3ur/mcli/internal/utils"
-	"github.com/Zigl3ur/mcli/internal/utils/loader"
+	"github.com/Zigl3ur/mcjar/internal/utils"
+	"github.com/Zigl3ur/mcjar/internal/utils/loader"
 )
+
+var manifestUrl = "https://launchermeta.mojang.com/mc/game/version_manifest.json"
 
 func ListHandler(snapshots bool) error {
 	rawList, err := getVersionsList()
@@ -83,7 +85,7 @@ func getUrl(version string) (string, error) {
 
 	serverUrl := downloadData.Downloads.Server.Url
 	if serverUrl == "" {
-		return "", err
+		return "", fmt.Errorf("no server jar available for version %s", version)
 	}
 
 	return serverUrl, nil
@@ -92,7 +94,7 @@ func getUrl(version string) (string, error) {
 func getVersionsList() (Versions, error) {
 
 	var versions Versions
-	if status, err := utils.GetReqJson("https://launchermeta.mojang.com/mc/game/version_manifest.json", &versions); err != nil {
+	if status, err := utils.GetReqJson(manifestUrl, &versions); err != nil {
 		return versions, fmt.Errorf("failed to fetch Vanilla versions from API (HTTP %d): %w", status, err)
 	}
 

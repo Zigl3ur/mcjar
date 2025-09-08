@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/Zigl3ur/mcli/internal/utils"
-	"github.com/Zigl3ur/mcli/internal/utils/loader"
+	"github.com/Zigl3ur/mcjar/internal/utils"
+	"github.com/Zigl3ur/mcjar/internal/utils/loader"
 )
+
+var baseUrl = "https://fill.papermc.io/v3/projects"
 
 func ListHandler(project, version string, versionChanged, snapshots bool) error {
 	rawList, err := getVersionsList(project)
@@ -70,11 +72,11 @@ func getUrl(project, version, build string) (string, error) {
 		} `json:"downloads"`
 	}
 
-	fetchUrl := fmt.Sprintf("https://fill.papermc.io/v3/projects/%s/versions/%s/builds/latest", project, version)
+	fetchUrl := fmt.Sprintf("%s/%s/versions/%s/builds/latest", baseUrl, project, version)
 	errorMsg := fmt.Errorf("no %s jar available for provided version (given: %s)", project, version)
 
 	if build != "latest" {
-		fetchUrl = fmt.Sprintf("https://fill.papermc.io/v3/projects/%s/versions/%s/builds/%s", project, version, build)
+		fetchUrl = fmt.Sprintf("%s/%s/versions/%s/builds/%s", baseUrl, project, version, build)
 		errorMsg = fmt.Errorf("no %s jar available for provided version / build (given: %s, %s)", project, version, build)
 	}
 
@@ -106,7 +108,7 @@ type PaperVersions struct {
 func getVersionsList(project string) (PaperVersions, error) {
 
 	var versions PaperVersions
-	if status, err := utils.GetReqJson(fmt.Sprintf("https://fill.papermc.io/v3/projects/%s/versions", project), &versions); err != nil {
+	if status, err := utils.GetReqJson(fmt.Sprintf("%s/%s/versions", baseUrl, project), &versions); err != nil {
 		return versions, fmt.Errorf("failed to fetch Paper versions from API (HTTP %d): %w", status, err)
 	}
 
@@ -120,7 +122,7 @@ type PaperBuild struct {
 func getBuildList(project, version string) ([]PaperBuild, error) {
 
 	var builds []PaperBuild
-	if status, err := utils.GetReqJson(fmt.Sprintf("https://fill.papermc.io/v3/projects/%s/versions/%s/builds?channel=STABLE", project, version), &builds); err != nil {
+	if status, err := utils.GetReqJson(fmt.Sprintf("%s/%s/versions/%s/builds?channel=STABLE", baseUrl, project, version), &builds); err != nil {
 		return nil, fmt.Errorf("failed to fetch Paper %s builds from API (HTTP %d): %w", version, status, err)
 
 	}

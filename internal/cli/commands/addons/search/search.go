@@ -5,10 +5,10 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/Zigl3ur/mcli/internal/cli/flags"
-	"github.com/Zigl3ur/mcli/internal/handlers/modrinth"
-	"github.com/Zigl3ur/mcli/internal/utils"
-	"github.com/Zigl3ur/mcli/internal/utils/loader"
+	"github.com/Zigl3ur/mcjar/internal/cli/flags"
+	"github.com/Zigl3ur/mcjar/internal/handlers/modrinth"
+	"github.com/Zigl3ur/mcjar/internal/utils"
+	"github.com/Zigl3ur/mcjar/internal/utils/loader"
 	"github.com/spf13/cobra"
 )
 

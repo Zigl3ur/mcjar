@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/Zigl3ur/mcli/internal/utils"
-	"github.com/Zigl3ur/mcli/internal/utils/loader"
+	"github.com/Zigl3ur/mcjar/internal/utils"
+	"github.com/Zigl3ur/mcjar/internal/utils/loader"
 )
+
+var baseUrl = "https://api.purpurmc.org/v2/purpur"
 
 func ListHandler(version string, versionChanged, snapshots bool) error {
 	rawList, err := getVersionsList()
@@ -85,7 +87,7 @@ func getUrl(version, build string) (string, error) {
 		}
 	}
 
-	return fmt.Sprintf("https://api.purpurmc.org/v2/purpur/%s/%s/download", version, build), nil
+	return fmt.Sprintf("%s/%s/%s/download", baseUrl, version, build), nil
 }
 
 func getVersionsList() ([]string, error) {
@@ -95,7 +97,7 @@ func getVersionsList() ([]string, error) {
 	}
 
 	var versions PurpurVersion
-	if status, err := utils.GetReqJson("https://api.purpurmc.org/v2/purpur", &versions); err != nil {
+	if status, err := utils.GetReqJson(fmt.Sprintf("%s", baseUrl), &versions); err != nil {
 		return nil, fmt.Errorf("failed to fetch Pupur versions from API (HTTP %d): %w", status, err)
 	}
 
@@ -112,7 +114,7 @@ func getBuildList(version string) ([]string, error) {
 	}
 
 	var builds PurpurBuilds
-	if status, err := utils.GetReqJson(fmt.Sprintf("https://api.purpurmc.org/v2/purpur/%s", version), &builds); err != nil {
+	if status, err := utils.GetReqJson(fmt.Sprintf("%s/%s", baseUrl, version), &builds); err != nil {
 		return nil, fmt.Errorf("failed to fetch Purpur %s builds from API (HTTP %d): %w", version, status, err)
 	}
 

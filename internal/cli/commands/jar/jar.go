@@ -5,14 +5,14 @@ import (
 	"path/filepath"
 	"slices"
 
-	"github.com/Zigl3ur/mcli/internal/cli/commands/jar/list"
-	"github.com/Zigl3ur/mcli/internal/cli/flags"
-	"github.com/Zigl3ur/mcli/internal/handlers/fabric"
-	"github.com/Zigl3ur/mcli/internal/handlers/forge"
-	"github.com/Zigl3ur/mcli/internal/handlers/neoforge"
-	"github.com/Zigl3ur/mcli/internal/handlers/paper"
-	"github.com/Zigl3ur/mcli/internal/handlers/purpur"
-	"github.com/Zigl3ur/mcli/internal/handlers/vanilla"
+	"github.com/Zigl3ur/mcjar/internal/cli/commands/jar/list"
+	"github.com/Zigl3ur/mcjar/internal/cli/flags"
+	"github.com/Zigl3ur/mcjar/internal/handlers/fabric"
+	"github.com/Zigl3ur/mcjar/internal/handlers/forge"
+	"github.com/Zigl3ur/mcjar/internal/handlers/neoforge"
+	"github.com/Zigl3ur/mcjar/internal/handlers/paper"
+	"github.com/Zigl3ur/mcjar/internal/handlers/purpur"
+	"github.com/Zigl3ur/mcjar/internal/handlers/vanilla"
 	"github.com/spf13/cobra"
 )
 

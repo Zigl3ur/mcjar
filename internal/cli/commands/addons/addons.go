@@ -1,9 +1,9 @@
 package addons
 
 import (
-	"github.com/Zigl3ur/mcli/internal/cli/commands/addons/get"
-	"github.com/Zigl3ur/mcli/internal/cli/commands/addons/info"
-	"github.com/Zigl3ur/mcli/internal/cli/commands/addons/search"
+	"github.com/Zigl3ur/mcjar/internal/cli/commands/addons/get"
+	"github.com/Zigl3ur/mcjar/internal/cli/commands/addons/info"
+	"github.com/Zigl3ur/mcjar/internal/cli/commands/addons/search"
 	"github.com/spf13/cobra"
 )
 

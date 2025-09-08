@@ -8,9 +8,11 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/Zigl3ur/mcli/internal/utils"
-	"github.com/Zigl3ur/mcli/internal/utils/loader"
+	"github.com/Zigl3ur/mcjar/internal/utils"
+	"github.com/Zigl3ur/mcjar/internal/utils/loader"
 )
+
+var baseUrl = "https://maven.minecraftforge.net/api/maven/versions/releases/net/minecraftforge/forge"
 
 func ListHandler(version string, versionChanged, snapshots bool) error {
 	rawList, err := getVersionsList()
@@ -100,11 +102,11 @@ func getUrl(version, build string) (string, error) {
 	}
 
 	latestBuild := vlist[version][0]
-	url := fmt.Sprintf("https://maven.minecraftforge.net/net/minecraftforge/forge/%s-%s/forge-%s-%s-installer.jar", version, latestBuild, version, latestBuild)
+	url := fmt.Sprintf("%s/net/minecraftforge/forge/%s-%s/forge-%s-%s-installer.jar", baseUrl, version, latestBuild, version, latestBuild)
 
 	if build != "latest" {
 		if slices.Contains(vlist[version], build) {
-			url = fmt.Sprintf("https://maven.minecraftforge.net/net/minecraftforge/forge/%s-%s/forge-%s-%s-installer.jar", version, build, version, build)
+			url = fmt.Sprintf("%s/net/minecraftforge/forge/%s-%s/forge-%s-%s-installer.jar", baseUrl, version, build, version, build)
 		} else {
 			return "", fmt.Errorf("no forge jar available for provided version (given: %s, %s)", version, build)
 		}
@@ -123,7 +125,7 @@ func getVersionsList() (map[string][]string, error) {
 	}
 
 	var versions ForgeVersions
-	if status, err := utils.GetReqXml("https://maven.minecraftforge.net/net/minecraftforge/forge/maven-metadata.xml", &versions); err != nil {
+	if status, err := utils.GetReqXml(fmt.Sprintf("%s/net/minecraftforge/forge/maven-metadata.xml", baseUrl), &versions); err != nil {
 		return nil, fmt.Errorf("failed to fetch Forge installer versions from API (HTTP %d): %w", status, err)
 	}
 

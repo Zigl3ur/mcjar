@@ -57,7 +57,7 @@ type ModsIndex struct {
 func MrPackHandler(packPath, modsDir string, isVerbose bool) error {
 
 	uuid := uuid.New()
-	output := filepath.Join(os.TempDir(), fmt.Sprintf("mcli-%s", uuid))
+	output := filepath.Join(os.TempDir(), fmt.Sprintf("mcjar-%s", uuid))
 
 	_ = os.MkdirAll(output, 0755)
 

@@ -9,9 +9,11 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/Zigl3ur/mcli/internal/utils"
-	"github.com/Zigl3ur/mcli/internal/utils/loader"
+	"github.com/Zigl3ur/mcjar/internal/utils"
+	"github.com/Zigl3ur/mcjar/internal/utils/loader"
 )
+
+var baseUrl = "https://maven.neoforged.net/api/maven/versions/releases/net/neoforged/neoforge"
 
 func ListHandler(version string, versionChanged, snapshots bool) error {
 	rawList, err := getVersionsList()
@@ -101,11 +103,11 @@ func getUrl(version, build string) (string, error) {
 		return "", fmt.Errorf("no neoforge jar available for provided version (given: %s)", version)
 	}
 
-	url := fmt.Sprintf("https://maven.neoforged.net/releases/net/neoforged/neoforge/%s/neoforge-%s-installer.jar", vlist[version][0], vlist[version][0])
+	url := fmt.Sprintf("%s/releases/net/neoforged/neoforge/%s/neoforge-%s-installer.jar", baseUrl, vlist[version][0], vlist[version][0])
 
 	if build != "latest" {
 		if slices.Contains(vlist[version], build) {
-			url = fmt.Sprintf("https://maven.neoforged.net/releases/net/neoforged/neoforge/%s/neoforge-%s-installer.jar", build, build)
+			url = fmt.Sprintf("%s/releases/net/neoforged/neoforge/%s/neoforge-%s-installer.jar", baseUrl, build, build)
 		} else {
 			return "", fmt.Errorf("no neoforge jar available for provided version / neoforge version (given: %s, %s)", version, build)
 		}
@@ -121,8 +123,8 @@ func getVersionsList() (map[string][]string, error) {
 	}
 
 	var list NeoforgeVersions
-	if status, err := utils.GetReqJson("https://maven.neoforged.net/api/maven/versions/releases/net/neoforged/neoforge", &list); err != nil {
-		return nil, fmt.Errorf("[%d] Failed to get neoforge versions list", status)
+	if status, err := utils.GetReqJson(baseUrl, &list); err != nil {
+		return nil, fmt.Errorf("failed to fetch Neoforge versions from API (HTTP %d): %w", status, err)
 	}
 
 	versionMap := make(map[string][]string)

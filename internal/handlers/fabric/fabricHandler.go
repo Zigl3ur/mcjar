@@ -4,9 +4,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/Zigl3ur/mcli/internal/utils"
-	"github.com/Zigl3ur/mcli/internal/utils/loader"
+	"github.com/Zigl3ur/mcjar/internal/utils"
+	"github.com/Zigl3ur/mcjar/internal/utils/loader"
 )
+
+var baseUrl = "https://meta.fabricmc.net/v2/versions"
 
 func ListHandler(version string, snapshots bool) error {
 	rawList, err := getVersionsList()
@@ -56,7 +58,7 @@ func getUrl(version string) (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf("https://meta.fabricmc.net/v2/versions/loader/%s/%s/%s/server/jar", version, loader, installer), nil
+	return fmt.Sprintf("%s/loader/%s/%s/%s/server/jar", baseUrl, version, loader, installer), nil
 }
 
 type FabricVersion struct {
@@ -69,7 +71,7 @@ type FabricVersion struct {
 func getVersionsList() (FabricVersion, error) {
 
 	var versions FabricVersion
-	if status, err := utils.GetReqJson("https://meta.fabricmc.net/v2/versions", &versions); err != nil {
+	if status, err := utils.GetReqJson(baseUrl, &versions); err != nil {
 		return versions, fmt.Errorf("failed to fetch Fabric versions from API (HTTP %d): %w", status, err)
 	}
 
@@ -84,7 +86,7 @@ func getStableLoader() (string, error) {
 	}
 
 	var list LoaderList
-	if status, err := utils.GetReqJson("https://meta.fabricmc.net/v2/versions/loader", &list); err != nil {
+	if status, err := utils.GetReqJson(fmt.Sprintf("%s/loader", baseUrl), &list); err != nil {
 		return "", fmt.Errorf("failed to fetch Fabric loader versions from API (HTTP %d): %w", status, err)
 	}
 
@@ -104,7 +106,7 @@ func getStableInstaller() (string, error) {
 	}
 
 	var list InstallerList
-	if status, err := utils.GetReqJson("https://meta.fabricmc.net/v2/versions/installer", &list); err != nil {
+	if status, err := utils.GetReqJson(fmt.Sprintf("%s/versions/installer", baseUrl), &list); err != nil {
 		return "", fmt.Errorf("failed to fetch Fabric installer versions from API (HTTP %d): %w", status, err)
 	}
 
