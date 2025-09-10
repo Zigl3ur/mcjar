@@ -25,7 +25,9 @@ func NewCommand() *cobra.Command {
 	cmd.Flags().StringP("destination", "d", "", "the folder where to put the downloaded jar, it will be created if it doesn't exist")
 
 	cmd.Flags().SortFlags = false
+	//nolint:errcheck
 	cmd.MarkFlagRequired("loader")
+	//nolint:errcheck
 	cmd.MarkFlagRequired("version")
 	cmd.MarkFlagsRequiredTogether("loader", "version")
 

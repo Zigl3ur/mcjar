@@ -73,6 +73,10 @@ func JarHandler(version, build, outPath string, isVerbose bool) error {
 	}
 
 	dir, _ := filepath.Split(outPath)
+	if dir == "" {
+		dir, _ = os.Getwd()
+	}
+
 	cmd := exec.Command(java, "-jar", outPath, "--installServer", dir)
 
 	if isVerbose {
