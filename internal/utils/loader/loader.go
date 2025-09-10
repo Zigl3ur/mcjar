@@ -2,11 +2,13 @@ package loader
 
 import (
 	"fmt"
+	"runtime"
 	"sync"
 	"time"
 )
 
 var loaderGlyphs = []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
+
 var (
 	finish    chan struct{}
 	mu        sync.Mutex
@@ -15,6 +17,10 @@ var (
 )
 
 func Start(message string) {
+	if runtime.GOOS == "windows" {
+		enableVirtualTermWindows()
+	}
+
 	mu.Lock()
 	defer mu.Unlock()
 

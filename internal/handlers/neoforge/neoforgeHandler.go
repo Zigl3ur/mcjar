@@ -13,7 +13,7 @@ import (
 	"github.com/Zigl3ur/mcjar/internal/utils/loader"
 )
 
-var baseUrl = "https://maven.neoforged.net/api/maven/versions/releases/net/neoforged/neoforge"
+var baseUrl = "https://maven.neoforged.net"
 
 func ListHandler(version string, versionChanged, snapshots bool) error {
 	rawList, err := getVersionsList()
@@ -123,7 +123,7 @@ func getVersionsList() (map[string][]string, error) {
 	}
 
 	var list NeoforgeVersions
-	if status, err := utils.GetReqJson(baseUrl, &list); err != nil {
+	if status, err := utils.GetReqJson(baseUrl+"/api/maven/versions/releases/net/neoforged/neoforge", &list); err != nil {
 		return nil, fmt.Errorf("failed to fetch Neoforge versions from API (HTTP %d): %w", status, err)
 	}
 

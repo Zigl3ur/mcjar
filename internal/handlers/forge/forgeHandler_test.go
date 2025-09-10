@@ -70,9 +70,9 @@ func TestGetUrl(t *testing.T) {
 		expectedUrl string
 		err         bool
 	}{
-		{"1.20.1", "latest", mockServer.URL + "/net/minecraftforge/forge/1.20.1-47.1.0/forge-1.20.1-47.1.0-installer.jar", false},
-		{"1.20.1", "47.0.35", mockServer.URL + "/net/minecraftforge/forge/1.20.1-47.0.35/forge-1.20.1-47.0.35-installer.jar", false},
-		{"1.19.4", "latest", mockServer.URL + "/net/minecraftforge/forge/1.19.4-45.2.0/forge-1.19.4-45.2.0-installer.jar", false},
+		{"1.20.1", "latest", mockServer.URL + "/1.20.1-47.1.0/forge-1.20.1-47.1.0-installer.jar", false},
+		{"1.20.1", "47.0.35", mockServer.URL + "/1.20.1-47.0.35/forge-1.20.1-47.0.35-installer.jar", false},
+		{"1.19.4", "latest", mockServer.URL + "/1.19.4-45.2.0/forge-1.19.4-45.2.0-installer.jar", false},
 		{"nonexistent", "latest", "", true},
 		{"1.20.1", "nonexistent", "", true},
 	}

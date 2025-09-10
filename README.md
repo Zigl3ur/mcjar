@@ -11,12 +11,14 @@ Or clone the repo and build it:
 ```bash
 git clone https://github.com/Zigl3ur/mcjar.git
 cd mcjar
+go mod tidy
 go build
 ```
 
 ## Commands
 
 - `jar` - Download a minecraft server jar
+
   - `list` - List available versions / builds for a specified server type
 
 - `addons` - Download mods / plugins / modpacks / datapacks from modrinth
@@ -30,13 +32,13 @@ go build
 
 - [x] Implement `list`, to list versions / build for specified server type
 - [x] Implement `jar`, to download server jar from specified servertype / version / build
-- [x] implement `addons`, to download mods / plugins / modpacks / datapacks
+- [x] Implement `addons`, to download mods / plugins / modpacks / datapacks
 
 ### Misc
 
 - [x] Function to sort an array of minecraft versions
 - [x] Display download speed
-- [ ] Add Tests for handlers and commands
+- [x] Add Tests for handlers and commands
 - [x] change default output if not specified to smthng like `neoforge-1.21.8-234.jar` (serverType-version-build.jar)
 - [x] for mods/plugins/modpacks/datapacks search display filter used (if any)
 - [ ] Better errors messages
