@@ -1,6 +1,6 @@
 # McJar
 
-A CLI tool to download minecraft server jars, mods, plugins, modpacks, datapacks and create backups of server folders.
+A CLI tool to download minecraft server jars, mods, plugins, modpacks, and datapacks.
 
 ## Installation
 
