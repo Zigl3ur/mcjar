@@ -27,7 +27,7 @@ func NewCommand() *cobra.Command {
 	cmd.Flags().StringP("index", "i", "relevance", "sort search result")
 	cmd.Flags().StringArrayP("versions", "v", []string{}, "versions that results items must support")
 	cmd.Flags().StringP("loader", "l", "", "the minecraft loader")
-	cmd.Flags().BoolP("slug", "s", false, "show the slug of items that are used for info / get commands")
+	cmd.Flags().BoolP("slug", "s", false, "show the slug of each item, it is used for info / get commands")
 
 	cmd.Flags().SortFlags = false
 
@@ -37,6 +37,11 @@ func NewCommand() *cobra.Command {
 func validate(cmd *cobra.Command, args []string) error {
 	mcLoader, _ := cmd.Flags().GetString("loader")
 	addonsType, _ := cmd.Flags().GetString("type")
+	index, _ := cmd.Flags().GetString("index")
+
+	if cmd.Flags().Changed("index") && !slices.Contains(flags.ValidIndex, index) {
+		return fmt.Errorf("invalid index type provided (given: %s) valid ones are %s", index, flags.ValidIndex)
+	}
 
 	if cmd.Flags().Changed("type") && !slices.Contains(flags.ValidAddons, addonsType) {
 		return fmt.Errorf("invalid addons type provided (given: %s) valid ones are %s", addonsType, flags.ValidAddons)

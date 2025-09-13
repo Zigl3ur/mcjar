@@ -6,12 +6,13 @@ func TestValidate(t *testing.T) {
 	test := []struct {
 		loader     string
 		addonsType string
+		indexType  string
 		err        bool
 	}{
-		{"fabric", "mod", false},
-		{"forge", "mod", false},
-		{"invalid", "mod", true},
-		{"fabric", "invalid", true},
+		{"fabric", "mod", "relevance", false},
+		{"forge", "mod", "newest", false},
+		{"invalid", "mod", "noindex", true},
+		{"fabric", "invalid", "stillnoindex", true},
 	}
 
 	cmd := NewCommand()
@@ -22,6 +23,9 @@ func TestValidate(t *testing.T) {
 				t.Fatal(err)
 			}
 			if err := cmd.Flags().Set("type", tt.addonsType); err != nil {
+				t.Fatal(err)
+			}
+			if err := cmd.Flags().Set("index", tt.indexType); err != nil {
 				t.Fatal(err)
 			}
 			err := validate(cmd, []string{"test"})

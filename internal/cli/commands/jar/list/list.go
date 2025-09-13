@@ -25,7 +25,7 @@ func NewCommand() *cobra.Command {
 	}
 
 	cmd.Flags().StringP("type", "t", "", "The server type to get version / builds list")
-	cmd.Flags().StringP("version", "v", "1.21", "The server version to get the list of builds (if available)")
+	cmd.Flags().StringP("version", "v", "1.21", "The server version to get the list of builds (if any)")
 	cmd.Flags().BoolP("snapshots", "s", false, "List snapshots versions (if any)")
 
 	cmd.Flags().SortFlags = false

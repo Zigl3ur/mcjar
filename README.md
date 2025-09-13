@@ -30,8 +30,8 @@ go build
 
 ### Commands
 
-- [x] Implement `list`, to list versions / build for specified server type
 - [x] Implement `jar`, to download server jar from specified servertype / version / build
+- [x] Implement `jar list`, to list versions / build for specified server type
 - [x] Implement `addons`, to download mods / plugins / modpacks / datapacks
 
 ### Misc

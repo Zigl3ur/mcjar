@@ -16,6 +16,6 @@ var ValidAddons = []string{
 	Modpack.String(),
 }
 
-func (s AddOns) String() string {
-	return string(s)
+func (a AddOns) String() string {
+	return string(a)
 }
