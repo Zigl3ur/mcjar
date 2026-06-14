@@ -10,3 +10,5 @@ FROM alpine:3.20
 RUN apk add --no-cache openjdk21-jre
 
 COPY --from=setup /mcjar /usr/local/bin/mcjar
+
+ENTRYPOINT ["/usr/local/bin/mcjar"]
