@@ -1,4 +1,4 @@
-name: Docker Image Publish
+name: public
 
 on:
     workflow_dispatch:
@@ -31,5 +31,5 @@ jobs:
                   context: .
                   push: true
                   tags: |
-                      ghcr.io/${{ github.repository }}:${{ inputs.version }}
-                      ghcr.io/${{ github.repository }}:latest
+                      ghcr.io/zigl3ur/mcjar:${{ inputs.version }}
+                      ghcr.io/zigl3ur/mcjar:latest
