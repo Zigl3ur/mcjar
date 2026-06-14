@@ -54,7 +54,7 @@ type ModsIndex struct {
 	} `json:"files"`
 }
 
-func MrPackHandler(packPath, modsDir string, isVerbose bool) error {
+func MrPackHandler(packPath, modsDir string) error {
 
 	uuid := uuid.New()
 	output := filepath.Join(os.TempDir(), fmt.Sprintf("mcjar-%s", uuid))

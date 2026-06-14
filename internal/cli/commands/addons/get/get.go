@@ -53,7 +53,6 @@ func execute(cmd *cobra.Command, args []string) error {
 	version, _ := cmd.Flags().GetString("version")
 	mcLoader, _ := cmd.Flags().GetString("loader")
 	dir, _ := cmd.Flags().GetString("destination")
-	isVerbose, _ := cmd.Flags().GetBool("verbose")
 
 	filePath, err := modrinth.Download(slug, version, mcLoader, dir)
 	if err != nil {
@@ -65,7 +64,7 @@ func execute(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	if err = utils.MrPackHandler(filePath, dir, isVerbose); err != nil {
+	if err = utils.MrPackHandler(filePath, dir); err != nil {
 		return err
 	}
 

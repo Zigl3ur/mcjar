@@ -106,7 +106,7 @@ func getStableInstaller() (string, error) {
 	}
 
 	var list InstallerList
-	if status, err := utils.GetReqJson(fmt.Sprintf("%s/versions/installer", baseUrl), &list); err != nil {
+	if status, err := utils.GetReqJson(fmt.Sprintf("%s/installer", baseUrl), &list); err != nil {
 		return "", fmt.Errorf("failed to fetch Fabric installer versions from API (HTTP %d): %w", status, err)
 	}
 
