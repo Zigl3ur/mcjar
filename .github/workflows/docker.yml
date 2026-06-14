@@ -1,4 +1,4 @@
-name: public
+name: publish image
 
 on:
     workflow_dispatch:
