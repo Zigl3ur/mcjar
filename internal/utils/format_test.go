@@ -38,7 +38,7 @@ func TestSortMcVersions(t *testing.T) {
 		given    []string
 		expected map[string][]string
 	}{
-		{[]string{"1.21.6", "1.8.9", "23w6a", "1.12.2", "1.7.2_pre4", "23w8b"}, map[string][]string{"versions": {"1.21.6", "1.12.2", "1.8.9"}, "snapshots": {"23w6a", "1.7.2_pre4", "23w8b"}}},
+		{[]string{"1.21.6", "1.8.9", "23w6a", "1.12.2", "1.7.2_pre4", "23w8b", "26.1.2", "26.1"}, map[string][]string{"versions": {"26.1.2", "26.1", "1.21.6", "1.12.2", "1.8.9"}, "snapshots": {"23w6a", "1.7.2_pre4", "23w8b"}}},
 		{[]string{"1.9", "1.10.2", "1.4.3"}, map[string][]string{"versions": {"1.10.2", "1.9", "1.4.3"}, "snapshots": {}}},
 		{[]string{"1.21.6", "23w6a", "1.21.6"}, map[string][]string{"versions": {"1.21.6", "1.21.6"}, "snapshots": {"23w6a"}}},
 		{[]string{"21E", " "}, map[string][]string{"versions": {}, "snapshots": {"21E", " "}}},

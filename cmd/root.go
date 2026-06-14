@@ -8,11 +8,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var version = "dev"
+
 var rootCmd = &cobra.Command{
 	Use:          "mcjar",
 	Short:        "A Simple cli tool to easily download jar for minecraft as server software and addons (plugins/mods/modpacks/datapacks)",
 	Long:         "A Simple cli tool to easily download jar for minecraft as server software and addons (plugins/mods/modpacks/datapacks)",
-	Version:      "0.0.1",
+	Version:      version,
 	SilenceUsage: true, // do not show usage on errors
 }
 
