@@ -4,10 +4,18 @@ A CLI tool to download minecraft server jars, mods, plugins, modpacks, and datap
 
 ## Installation
 
-Download the latest release [here](https://github.com/Zigl3ur/mcjar/releases).
+### Binary
 
-Or clone the repo and build it:
+  Grab it from the [releases](https://github.com/Zigl3ur/mcjar/releases/latest)
 
+### Docker
+
+```bash
+docker pull ghcr.io/zigl3ur/mcjar:latest
+docker run --rm -it ghcr.io/zigl3ur/mcjar:latest <args>
+```
+
+### Build from source
 ```bash
 git clone https://github.com/Zigl3ur/mcjar.git
 cd mcjar
@@ -25,20 +33,3 @@ go build
   - `search` - Search for mods / plugins / modpacks / datapacks
   - `info` - Get info about a mod / plugin / modpack / datapack
   - `get` - Download a mod / plugin / modpack / datapack
-
-## TODOS
-
-### Commands
-
-- [x] Implement `jar`, to download server jar from specified servertype / version / build
-- [x] Implement `jar list`, to list versions / build for specified server type
-- [x] Implement `addons`, to download mods / plugins / modpacks / datapacks
-
-### Misc
-
-- [x] Function to sort an array of minecraft versions
-- [x] Display download speed
-- [x] Add Tests for handlers and commands
-- [x] change default output if not specified to smthng like `neoforge-1.21.8-234.jar` (serverType-version-build.jar)
-- [x] for mods/plugins/modpacks/datapacks search display filter used (if any)
-- [ ] Better errors messages
